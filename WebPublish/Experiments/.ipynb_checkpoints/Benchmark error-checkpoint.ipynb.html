@@ -1,0 +1,285 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <link rel="stylesheet" href="https://rawgithub.com/highlightjs/cdn-release/master/build/styles/github.min.css">
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/highlight.min.js"></script>
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/languages/undefined.min.js"></script>
+  <style>
+    body {
+      margin: 0px;
+      padding: 15px;
+      font-size: 12
+    }
+    .hljs {
+      margin: -15px;
+      word-wrap: break-word;
+    }
+    body, .hljs {
+      font-family: Menlo, Consolas, DejaVu Sans Mono, monospace;
+    }
+    .number {
+      float:left;
+      text-align: right;
+      display: inline-block;
+      margin-right: 5px;
+    }
+    .ln {
+      opacity: 0.5;
+    }
+    pre {
+      tab-size:      4;
+    }
+  </style>
+</head>
+<body>
+<pre><code class="ipynb">
+<span class="number"><span>1</span></span><span class="code">{</span>
+<span class="number"><span>2</span></span><span class="code"> &quot;cells&quot;: [</span>
+<span class="number"><span>3</span></span><span class="code">  {</span>
+<span class="number"><span>4</span></span><span class="code">   &quot;cell_type&quot;: &quot;markdown&quot;,</span>
+<span class="number"><span>5</span></span><span class="code">   &quot;id&quot;: &quot;47e84396&quot;,</span>
+<span class="number"><span>6</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>7</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>8</span></span><span class="code">    &quot;# Loading packages and functions&quot;</span>
+<span class="number"><span>9</span></span><span class="code">   ]</span>
+<span class="number"><span>10</span></span><span class="code">  },</span>
+<span class="number"><span>11</span></span><span class="code">  {</span>
+<span class="number"><span>12</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>13</span></span><span class="code">   &quot;execution_count&quot;: null,</span>
+<span class="number"><span>14</span></span><span class="code">   &quot;id&quot;: &quot;47c56426&quot;,</span>
+<span class="number"><span>15</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>16</span></span><span class="code">   &quot;outputs&quot;: [],</span>
+<span class="number"><span>17</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>18</span></span><span class="code">    &quot;using LinearAlgebra\n&quot;,</span>
+<span class="number"><span>19</span></span><span class="code">    &quot;using Plots\n&quot;,</span>
+<span class="number"><span>20</span></span><span class="code">    &quot;using SIMD\n&quot;,</span>
+<span class="number"><span>21</span></span><span class="code">    &quot;using IRKGaussLegendre\n&quot;,</span>
+<span class="number"><span>22</span></span><span class="code">    &quot;using DiffEqDevTools,BenchmarkTools\n&quot;,</span>
+<span class="number"><span>23</span></span><span class="code">    &quot;using OrdinaryDiffEq\n&quot;,</span>
+<span class="number"><span>24</span></span><span class="code">    &quot;using JLD2, FileIO\n&quot;,</span>
+<span class="number"><span>25</span></span><span class="code">    &quot;using RecursiveArrayTools&quot;</span>
+<span class="number"><span>26</span></span><span class="code">   ]</span>
+<span class="number"><span>27</span></span><span class="code">  },</span>
+<span class="number"><span>28</span></span><span class="code">  {</span>
+<span class="number"><span>29</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>30</span></span><span class="code">   &quot;execution_count&quot;: null,</span>
+<span class="number"><span>31</span></span><span class="code">   &quot;id&quot;: &quot;21d5051b&quot;,</span>
+<span class="number"><span>32</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>33</span></span><span class="code">   &quot;outputs&quot;: [],</span>
+<span class="number"><span>34</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>35</span></span><span class="code">    &quot;PATH_SRC=\&quot;../src/\&quot;\n&quot;,</span>
+<span class="number"><span>36</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>37</span></span><span class="code">    &quot;include(string(PATH_SRC,\&quot;IRKGL_SIMD.jl\&quot;))\n&quot;,</span>
+<span class="number"><span>38</span></span><span class="code">    &quot;using .IRKGL_SIMD &quot;</span>
+<span class="number"><span>39</span></span><span class="code">   ]</span>
+<span class="number"><span>40</span></span><span class="code">  },</span>
+<span class="number"><span>41</span></span><span class="code">  {</span>
+<span class="number"><span>42</span></span><span class="code">   &quot;cell_type&quot;: &quot;markdown&quot;,</span>
+<span class="number"><span>43</span></span><span class="code">   &quot;id&quot;: &quot;0c33d0af&quot;,</span>
+<span class="number"><span>44</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>45</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>46</span></span><span class="code">    &quot;## Definition of the N-body problem\n&quot;,</span>
+<span class="number"><span>47</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>48</span></span><span class="code">    &quot;In Nbody.jl below, the following functions are defined: NbodyEnergy(u,Gm), NbodyODE!(du,u,Gm,t), and NbodyODE1!(du,u,Gm,t), where\n&quot;,</span>
+<span class="number"><span>49</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>50</span></span><span class="code">    &quot;\\begin{equation*}\n&quot;,</span>
+<span class="number"><span>51</span></span><span class="code">    &quot;u = \n&quot;,</span>
+<span class="number"><span>52</span></span><span class="code">    &quot;\\left(\\begin{matrix}\n&quot;,</span>
+<span class="number"><span>53</span></span><span class="code">    &quot;q_1  &amp; v_1\\\\\n&quot;,</span>
+<span class="number"><span>54</span></span><span class="code">    &quot;\\vdots &amp; \\vdots \\\\\n&quot;,</span>
+<span class="number"><span>55</span></span><span class="code">    &quot;q_N  &amp; v_N\n&quot;,</span>
+<span class="number"><span>56</span></span><span class="code">    &quot;\\end{matrix}\n&quot;,</span>
+<span class="number"><span>57</span></span><span class="code">    &quot;\\right) \\in \\mathbb{R}^{2 \\times 3\\times N}, \\quad\n&quot;,</span>
+<span class="number"><span>58</span></span><span class="code">    &quot;Gm = (G\\,  m_1, \\ldots,G\\,  m_N) \\in \\mathbb{R}^N.\n&quot;,</span>
+<span class="number"><span>59</span></span><span class="code">    &quot;\\end{equation*}\n&quot;,</span>
+<span class="number"><span>60</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>61</span></span><span class="code">    &quot;The energy, as a function of the positions $q_1,\\ldots,q_N \\in \\mathbb{R}^3$ and the velocities $v_1,\\ldots,v_N \\in \\mathbb{R}^3$ of the $N$ bodies is:\n&quot;,</span>
+<span class="number"><span>62</span></span><span class="code">    &quot;\\begin{equation*}\n&quot;,</span>
+<span class="number"><span>63</span></span><span class="code">    &quot;\\begin{split}\n&quot;,</span>
+<span class="number"><span>64</span></span><span class="code">    &quot;\\mathrm{Energy}(q_1,\\ldots,q_N,v_1,\\ldots,v_N) = \n&quot;,</span>
+<span class="number"><span>65</span></span><span class="code">    &quot;\\frac12 \\sum_{i=1}^{N} m_i \\, \\|v_i\\|^2\n&quot;,</span>
+<span class="number"><span>66</span></span><span class="code">    &quot;- G \\sum_{1\\leq i &lt; j \\leq N} \\frac{m_i m_j}{\\|q_i-q_j\\|}.\n&quot;,</span>
+<span class="number"><span>67</span></span><span class="code">    &quot;\\end{split}\n&quot;,</span>
+<span class="number"><span>68</span></span><span class="code">    &quot;\\end{equation*}\n&quot;,</span>
+<span class="number"><span>69</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>70</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>71</span></span><span class="code">    &quot;The ODE system of the N-body problem,\n&quot;,</span>
+<span class="number"><span>72</span></span><span class="code">    &quot;as a function of the positions $q_1,\\ldots,q_N \\in \\mathbb{R}^3$ and the velocities $v_1,\\ldots,v_N \\in \\mathbb{R}^3$ of the $N$ bodies is:\n&quot;,</span>
+<span class="number"><span>73</span></span><span class="code">    &quot;\\begin{equation*}\n&quot;,</span>
+<span class="number"><span>74</span></span><span class="code">    &quot;\\begin{split}\n&quot;,</span>
+<span class="number"><span>75</span></span><span class="code">    &quot;\\frac{d}{dt} q_i &amp;= v_i, \\\\\n&quot;,</span>
+<span class="number"><span>76</span></span><span class="code">    &quot;\\frac{d}{dt} v_i &amp;= G\\, \n&quot;,</span>
+<span class="number"><span>77</span></span><span class="code">    &quot;\\sum_{j \\neq i} \\frac{m_j}{\\|q_j-q_i\\|^3}\\,\n&quot;,</span>
+<span class="number"><span>78</span></span><span class="code">    &quot;(q_j-q_i).\n&quot;,</span>
+<span class="number"><span>79</span></span><span class="code">    &quot;\\end{split}\n&quot;,</span>
+<span class="number"><span>80</span></span><span class="code">    &quot;\\end{equation*}\n&quot;,</span>
+<span class="number"><span>81</span></span><span class="code">    &quot;This system of ODEs can be writen in compact form as\n&quot;,</span>
+<span class="number"><span>82</span></span><span class="code">    &quot;\\begin{equation*}\n&quot;,</span>
+<span class="number"><span>83</span></span><span class="code">    &quot;\\frac{d u}{dt} = f(t,u,Gm)\n&quot;,</span>
+<span class="number"><span>84</span></span><span class="code">    &quot;\\end{equation*}\n&quot;</span>
+<span class="number"><span>85</span></span><span class="code">   ]</span>
+<span class="number"><span>86</span></span><span class="code">  },</span>
+<span class="number"><span>87</span></span><span class="code">  {</span>
+<span class="number"><span>88</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>89</span></span><span class="code">   &quot;execution_count&quot;: 3,</span>
+<span class="number"><span>90</span></span><span class="code">   &quot;id&quot;: &quot;87a909d8&quot;,</span>
+<span class="number"><span>91</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>92</span></span><span class="code">   &quot;outputs&quot;: [</span>
+<span class="number"><span>93</span></span><span class="code">    {</span>
+<span class="number"><span>94</span></span><span class="code">     &quot;data&quot;: {</span>
+<span class="number"><span>95</span></span><span class="code">      &quot;text/plain&quot;: [</span>
+<span class="number"><span>96</span></span><span class="code">       &quot;NbodyODE2nd! (generic function with 1 method)&quot;</span>
+<span class="number"><span>97</span></span><span class="code">      ]</span>
+<span class="number"><span>98</span></span><span class="code">     },</span>
+<span class="number"><span>99</span></span><span class="code">     &quot;execution_count&quot;: 3,</span>
+<span class="number"><span>100</span></span><span class="code">     &quot;metadata&quot;: {},</span>
+<span class="number"><span>101</span></span><span class="code">     &quot;output_type&quot;: &quot;execute_result&quot;</span>
+<span class="number"><span>102</span></span><span class="code">    }</span>
+<span class="number"><span>103</span></span><span class="code">   ],</span>
+<span class="number"><span>104</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>105</span></span><span class="code">    &quot;PATH_ODES=\&quot;../ODEProblems/\&quot;\n&quot;,</span>
+<span class="number"><span>106</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>107</span></span><span class="code">    &quot;include(string(PATH_ODES,\&quot;Initial5Body.jl\&quot;))\n&quot;,</span>
+<span class="number"><span>108</span></span><span class="code">    &quot;include(string(PATH_ODES,\&quot;Nbody.jl\&quot;))\n&quot;,</span>
+<span class="number"><span>109</span></span><span class="code">    &quot;include(string(PATH_ODES,\&quot;Nbody2nd.jl\&quot;))&quot;</span>
+<span class="number"><span>110</span></span><span class="code">   ]</span>
+<span class="number"><span>111</span></span><span class="code">  },</span>
+<span class="number"><span>112</span></span><span class="code">  {</span>
+<span class="number"><span>113</span></span><span class="code">   &quot;cell_type&quot;: &quot;markdown&quot;,</span>
+<span class="number"><span>114</span></span><span class="code">   &quot;id&quot;: &quot;a47136aa&quot;,</span>
+<span class="number"><span>115</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>116</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>117</span></span><span class="code">    &quot;## Initial value problem: 5-body problem (outer solar system)\n&quot;,</span>
+<span class="number"><span>118</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>119</span></span><span class="code">    &quot;We consider $N=5$ bodies of the outer solar system: the Sun, Jupiter, Saturn, Uranus, and Neptune.\n&quot;,</span>
+<span class="number"><span>120</span></span><span class="code">    &quot;The initial values $u_{00}$ are taken from DE430, Julian day (TDB) 2440400.5 (June 28, 1969). &quot;</span>
+<span class="number"><span>121</span></span><span class="code">   ]</span>
+<span class="number"><span>122</span></span><span class="code">  },</span>
+<span class="number"><span>123</span></span><span class="code">  {</span>
+<span class="number"><span>124</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>125</span></span><span class="code">   &quot;execution_count&quot;: null,</span>
+<span class="number"><span>126</span></span><span class="code">   &quot;id&quot;: &quot;3be1ba6b&quot;,</span>
+<span class="number"><span>127</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>128</span></span><span class="code">   &quot;outputs&quot;: [],</span>
+<span class="number"><span>129</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>130</span></span><span class="code">    &quot;u0, Gm, bodylist = Initial5Body(Float64)\n&quot;,</span>
+<span class="number"><span>131</span></span><span class="code">    &quot;q0=u0[:,:,1]\n&quot;,</span>
+<span class="number"><span>132</span></span><span class="code">    &quot;v0=u0[:,:,2]\n&quot;,</span>
+<span class="number"><span>133</span></span><span class="code">    &quot;N = length(Gm)\n&quot;,</span>
+<span class="number"><span>134</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>135</span></span><span class="code">    &quot;show(bodylist)\n&quot;,</span>
+<span class="number"><span>136</span></span><span class="code">    &quot;E0=NbodyEnergy(u0,Gm)&quot;</span>
+<span class="number"><span>137</span></span><span class="code">   ]</span>
+<span class="number"><span>138</span></span><span class="code">  },</span>
+<span class="number"><span>139</span></span><span class="code">  {</span>
+<span class="number"><span>140</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>141</span></span><span class="code">   &quot;execution_count&quot;: null,</span>
+<span class="number"><span>142</span></span><span class="code">   &quot;id&quot;: &quot;2a028dcd&quot;,</span>
+<span class="number"><span>143</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>144</span></span><span class="code">   &quot;outputs&quot;: [],</span>
+<span class="number"><span>145</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>146</span></span><span class="code">    &quot;t0 = 0.\n&quot;,</span>
+<span class="number"><span>147</span></span><span class="code">    &quot;dt = 200.\n&quot;,</span>
+<span class="number"><span>148</span></span><span class="code">    &quot;tF = 1e6  #1e8\n&quot;,</span>
+<span class="number"><span>149</span></span><span class="code">    &quot;#tF = 8dt\n&quot;,</span>
+<span class="number"><span>150</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>151</span></span><span class="code">    &quot;n = 1000\n&quot;,</span>
+<span class="number"><span>152</span></span><span class="code">    &quot;#n = 5\n&quot;,</span>
+<span class="number"><span>153</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>154</span></span><span class="code">    &quot;m = convert(Int64,ceil(abs(tF-t0)/(n*dt)))\n&quot;,</span>
+<span class="number"><span>155</span></span><span class="code">    &quot;n = convert(Int64,ceil(abs(tF-t0)/(m*dt))) # Number of macro-steps (Output is saved for n+1 time values)\n&quot;,</span>
+<span class="number"><span>156</span></span><span class="code">    &quot;dt = (tF-t0)/(n*m)\n&quot;,</span>
+<span class="number"><span>157</span></span><span class="code">    &quot;println(\&quot;dt = $dt, n=$n, m=$m\&quot;)\n&quot;,</span>
+<span class="number"><span>158</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>159</span></span><span class="code">    &quot;itermax = 100\n&quot;,</span>
+<span class="number"><span>160</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>161</span></span><span class="code">    &quot;prob = ODEProblem(NbodyODE!, u0, (t0,tF), Gm)\n&quot;,</span>
+<span class="number"><span>162</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>163</span></span><span class="code">    &quot;udim=u0[1:1,1:1,1:1]\n&quot;,</span>
+<span class="number"><span>164</span></span><span class="code">    &quot;sol1=solve(prob,IRKGL_simd(), udim, s=s, dt=dt, m=m, initial_interp=true, itermax=itermax)\n&quot;,</span>
+<span class="number"><span>165</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>166</span></span><span class="code">    &quot;prob = ODEProblem(NbodyODE!, u0, (t0,tF), Gm)\n&quot;,</span>
+<span class="number"><span>167</span></span><span class="code">    &quot;sol4 = solve(prob, Vern9(), adaptive=false, dt=dt/2, saveat=m*dt, dense=false)\n&quot;,</span>
+<span class="number"><span>168</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>169</span></span><span class="code">    &quot;prob2nd = SecondOrderODEProblem(NbodyODE2nd!,v0,q0,(t0,tF),Gm)\n&quot;,</span>
+<span class="number"><span>170</span></span><span class="code">    &quot;sol5 = solve(prob2nd, DPRKN12(), adaptive=false, dt=dt/2, saveat=m*dt, dense=false)&quot;</span>
+<span class="number"><span>171</span></span><span class="code">   ]</span>
+<span class="number"><span>172</span></span><span class="code">  },</span>
+<span class="number"><span>173</span></span><span class="code">  {</span>
+<span class="number"><span>174</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>175</span></span><span class="code">   &quot;execution_count&quot;: null,</span>
+<span class="number"><span>176</span></span><span class="code">   &quot;id&quot;: &quot;c03ff019&quot;,</span>
+<span class="number"><span>177</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>178</span></span><span class="code">   &quot;outputs&quot;: [],</span>
+<span class="number"><span>179</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>180</span></span><span class="code">    &quot;yrange = (1e-18,1e-10)\n&quot;,</span>
+<span class="number"><span>181</span></span><span class="code">    &quot;year = 365.5\n&quot;,</span>
+<span class="number"><span>182</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>183</span></span><span class="code">    &quot;function energy_plot(sol; title=\&quot;\&quot;)\n&quot;,</span>
+<span class="number"><span>184</span></span><span class="code">    &quot;    energies = [NbodyEnergy(BigFloat.(u),Gm) for u in sol.u]\n&quot;,</span>
+<span class="number"><span>185</span></span><span class="code">    &quot;    E0 = energies[1]\n&quot;,</span>
+<span class="number"><span>186</span></span><span class="code">    &quot;    epsilon = eps(1e-3)\n&quot;,</span>
+<span class="number"><span>187</span></span><span class="code">    &quot;    errors = Float64.(abs.(energies[2:end]/E0 .- 1)) .+ epsilon\n&quot;,</span>
+<span class="number"><span>188</span></span><span class="code">    &quot;    tt = sol.t[2:end]/year\n&quot;,</span>
+<span class="number"><span>189</span></span><span class="code">    &quot;    pl = plot(title=title,\n&quot;,</span>
+<span class="number"><span>190</span></span><span class="code">    &quot;         yscale=:log10, ylims=yrange, legend=false)\n&quot;,</span>
+<span class="number"><span>191</span></span><span class="code">    &quot;    plot!(tt,  errors)\n&quot;,</span>
+<span class="number"><span>192</span></span><span class="code">    &quot;    return pl\n&quot;,</span>
+<span class="number"><span>193</span></span><span class="code">    &quot;end\n&quot;,</span>
+<span class="number"><span>194</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>195</span></span><span class="code">    &quot;pl1 = energy_plot(sol1, title=\&quot;IRKGL (VecArray)\&quot;)\n&quot;,</span>
+<span class="number"><span>196</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>197</span></span><span class="code">    &quot;pl4 = energy_plot(sol4, title=\&quot;Vern9\&quot;)\n&quot;,</span>
+<span class="number"><span>198</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>199</span></span><span class="code">    &quot;pl5 = energy_plot(sol4, title=\&quot;DPRKN12\&quot;)\n&quot;,</span>
+<span class="number"><span>200</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>201</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>202</span></span><span class="code">    &quot;plot(pl0, pl1, pl2, pl4, pl5,  layout=(5,1), size=(600,900))&quot;</span>
+<span class="number"><span>203</span></span><span class="code">   ]</span>
+<span class="number"><span>204</span></span><span class="code">  }</span>
+<span class="number"><span>205</span></span><span class="code"> ],</span>
+<span class="number"><span>206</span></span><span class="code"> &quot;metadata&quot;: {</span>
+<span class="number"><span>207</span></span><span class="code">  &quot;kernelspec&quot;: {</span>
+<span class="number"><span>208</span></span><span class="code">   &quot;display_name&quot;: &quot;Julia 1.6.6&quot;,</span>
+<span class="number"><span>209</span></span><span class="code">   &quot;language&quot;: &quot;julia&quot;,</span>
+<span class="number"><span>210</span></span><span class="code">   &quot;name&quot;: &quot;julia-1.6&quot;</span>
+<span class="number"><span>211</span></span><span class="code">  },</span>
+<span class="number"><span>212</span></span><span class="code">  &quot;language_info&quot;: {</span>
+<span class="number"><span>213</span></span><span class="code">   &quot;file_extension&quot;: &quot;.jl&quot;,</span>
+<span class="number"><span>214</span></span><span class="code">   &quot;mimetype&quot;: &quot;application/julia&quot;,</span>
+<span class="number"><span>215</span></span><span class="code">   &quot;name&quot;: &quot;julia&quot;,</span>
+<span class="number"><span>216</span></span><span class="code">   &quot;version&quot;: &quot;1.6.6&quot;</span>
+<span class="number"><span>217</span></span><span class="code">  }</span>
+<span class="number"><span>218</span></span><span class="code"> },</span>
+<span class="number"><span>219</span></span><span class="code"> &quot;nbformat&quot;: 4,</span>
+<span class="number"><span>220</span></span><span class="code"> &quot;nbformat_minor&quot;: 5</span>
+<span class="number"><span>221</span></span><span class="code">}</span>
+<span class="number"><span>222</span></span><span class="code"></span>
+</code></pre>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>
+  setTimeout(function() {
+    $(".number").css("width", "20px");
+    $(".number span").attr("class", "ln hljs-subst");
+    resize();
+    var timer = false;
+    $(window).resize(function() {
+      if (timer !== false) {
+        clearTimeout(timer);
+      }
+      timer = setTimeout(function() {
+        resize();
+      }, 200);
+    })
+
+  }, 100);
+  function resize() {
+    $("span.code").each(function(i, c) {
+      var h = $(c).height();
+      $(c).prev().height(h);
+    });
+  }
+</script>
+</body>
+</html>

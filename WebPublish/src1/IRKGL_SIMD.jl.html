@@ -1,0 +1,90 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <link rel="stylesheet" href="https://rawgithub.com/highlightjs/cdn-release/master/build/styles/github.min.css">
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/highlight.min.js"></script>
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/languages/undefined.min.js"></script>
+  <style>
+    body {
+      margin: 0px;
+      padding: 15px;
+      font-size: 12
+    }
+    .hljs {
+      margin: -15px;
+      word-wrap: break-word;
+    }
+    body, .hljs {
+      font-family: Menlo, Consolas, DejaVu Sans Mono, monospace;
+    }
+    .number {
+      float:left;
+      text-align: right;
+      display: inline-block;
+      margin-right: 5px;
+    }
+    .ln {
+      opacity: 0.5;
+    }
+    pre {
+      tab-size:      4;
+    }
+  </style>
+</head>
+<body>
+<pre><code class="jl">
+<span class="number"><span>1</span></span><span class="code">__precompile__()</span>
+<span class="number"><span>2</span></span><span class="code"></span>
+<span class="number"><span>3</span></span><span class="code">module IRKGL_SIMD</span>
+<span class="number"><span>4</span></span><span class="code"></span>
+<span class="number"><span>5</span></span><span class="code">using Reexport</span>
+<span class="number"><span>6</span></span><span class="code">@reexport using DiffEqBase</span>
+<span class="number"><span>7</span></span><span class="code"></span>
+<span class="number"><span>8</span></span><span class="code">using LinearAlgebra</span>
+<span class="number"><span>9</span></span><span class="code">using Parameters</span>
+<span class="number"><span>10</span></span><span class="code">using OrdinaryDiffEq</span>
+<span class="number"><span>11</span></span><span class="code">using RecursiveArrayTools</span>
+<span class="number"><span>12</span></span><span class="code">using BenchmarkTools</span>
+<span class="number"><span>13</span></span><span class="code">using SIMD</span>
+<span class="number"><span>14</span></span><span class="code"></span>
+<span class="number"><span>15</span></span><span class="code">export  IRKGL_simd, IRKGL_Seq, IRKAlgorithm</span>
+<span class="number"><span>16</span></span><span class="code">export  VecArray, floatType, IRKGLCoefficients</span>
+<span class="number"><span>17</span></span><span class="code">export  WPTests, launch_IRKGL_simd_tests</span>
+<span class="number"><span>18</span></span><span class="code">#export  launch_IRKGL_seq_tests, launch_IRKGL16_tests</span>
+<span class="number"><span>19</span></span><span class="code">#export  launch_method_tests</span>
+<span class="number"><span>20</span></span><span class="code"></span>
+<span class="number"><span>21</span></span><span class="code">include(&quot;IRKGL_Coefficients.jl&quot;)</span>
+<span class="number"><span>22</span></span><span class="code">include(&quot;IRKGL_Seq.jl&quot;)</span>
+<span class="number"><span>23</span></span><span class="code">include(&quot;IRKGL_SIMD_Solver.jl&quot;)</span>
+<span class="number"><span>24</span></span><span class="code">#include(&quot;MyBenchmarksTools.jl&quot;)</span>
+<span class="number"><span>25</span></span><span class="code"></span>
+<span class="number"><span>26</span></span><span class="code">end # module</span>
+<span class="number"><span>27</span></span><span class="code"></span>
+</code></pre>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>
+  setTimeout(function() {
+    $(".number").css("width", "20px");
+    $(".number span").attr("class", "ln hljs-subst");
+    resize();
+    var timer = false;
+    $(window).resize(function() {
+      if (timer !== false) {
+        clearTimeout(timer);
+      }
+      timer = setTimeout(function() {
+        resize();
+      }, 200);
+    })
+
+  }, 100);
+  function resize() {
+    $("span.code").each(function(i, c) {
+      var h = $(c).height();
+      $(c).prev().height(h);
+    });
+  }
+</script>
+</body>
+</html>

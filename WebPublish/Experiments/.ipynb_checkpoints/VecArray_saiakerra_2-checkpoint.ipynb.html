@@ -1,0 +1,766 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <link rel="stylesheet" href="https://rawgithub.com/highlightjs/cdn-release/master/build/styles/github.min.css">
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/highlight.min.js"></script>
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/languages/undefined.min.js"></script>
+  <style>
+    body {
+      margin: 0px;
+      padding: 15px;
+      font-size: 12
+    }
+    .hljs {
+      margin: -15px;
+      word-wrap: break-word;
+    }
+    body, .hljs {
+      font-family: Menlo, Consolas, DejaVu Sans Mono, monospace;
+    }
+    .number {
+      float:left;
+      text-align: right;
+      display: inline-block;
+      margin-right: 5px;
+    }
+    .ln {
+      opacity: 0.5;
+    }
+    pre {
+      tab-size:      4;
+    }
+  </style>
+</head>
+<body>
+<pre><code class="ipynb">
+<span class="number"><span>1</span></span><span class="code">{</span>
+<span class="number"><span>2</span></span><span class="code"> &quot;cells&quot;: [</span>
+<span class="number"><span>3</span></span><span class="code">  {</span>
+<span class="number"><span>4</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>5</span></span><span class="code">   &quot;execution_count&quot;: 1,</span>
+<span class="number"><span>6</span></span><span class="code">   &quot;id&quot;: &quot;a98a31a9&quot;,</span>
+<span class="number"><span>7</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>8</span></span><span class="code">   &quot;outputs&quot;: [</span>
+<span class="number"><span>9</span></span><span class="code">    {</span>
+<span class="number"><span>10</span></span><span class="code">     &quot;data&quot;: {</span>
+<span class="number"><span>11</span></span><span class="code">      &quot;text/plain&quot;: [</span>
+<span class="number"><span>12</span></span><span class="code">       &quot;setindex_! (generic function with 2 methods)&quot;</span>
+<span class="number"><span>13</span></span><span class="code">      ]</span>
+<span class="number"><span>14</span></span><span class="code">     },</span>
+<span class="number"><span>15</span></span><span class="code">     &quot;execution_count&quot;: 1,</span>
+<span class="number"><span>16</span></span><span class="code">     &quot;metadata&quot;: {},</span>
+<span class="number"><span>17</span></span><span class="code">     &quot;output_type&quot;: &quot;execute_result&quot;</span>
+<span class="number"><span>18</span></span><span class="code">    }</span>
+<span class="number"><span>19</span></span><span class="code">   ],</span>
+<span class="number"><span>20</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>21</span></span><span class="code">    &quot;using SIMD\n&quot;,</span>
+<span class="number"><span>22</span></span><span class="code">    &quot;include(\&quot;../src/VecArray_def.jl\&quot;)&quot;</span>
+<span class="number"><span>23</span></span><span class="code">   ]</span>
+<span class="number"><span>24</span></span><span class="code">  },</span>
+<span class="number"><span>25</span></span><span class="code">  {</span>
+<span class="number"><span>26</span></span><span class="code">   &quot;cell_type&quot;: &quot;markdown&quot;,</span>
+<span class="number"><span>27</span></span><span class="code">   &quot;id&quot;: &quot;352be350&quot;,</span>
+<span class="number"><span>28</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>29</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>30</span></span><span class="code">    &quot;## Bi dimentsio&quot;</span>
+<span class="number"><span>31</span></span><span class="code">   ]</span>
+<span class="number"><span>32</span></span><span class="code">  },</span>
+<span class="number"><span>33</span></span><span class="code">  {</span>
+<span class="number"><span>34</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>35</span></span><span class="code">   &quot;execution_count&quot;: 2,</span>
+<span class="number"><span>36</span></span><span class="code">   &quot;id&quot;: &quot;7a13500a&quot;,</span>
+<span class="number"><span>37</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>38</span></span><span class="code">   &quot;outputs&quot;: [</span>
+<span class="number"><span>39</span></span><span class="code">    {</span>
+<span class="number"><span>40</span></span><span class="code">     &quot;data&quot;: {</span>
+<span class="number"><span>41</span></span><span class="code">      &quot;text/plain&quot;: [</span>
+<span class="number"><span>42</span></span><span class="code">       &quot;&lt;8 x Float64&gt;[314.6502878401571, 21013.029464716463, 2.0100136952755097e6, 2.0010001482635364e8, 2.0001000014968452e10, 2.0000100000130024e12, 2.00000100000015e14, 2.0000001000000016e16]&quot;</span>
+<span class="number"><span>43</span></span><span class="code">      ]</span>
+<span class="number"><span>44</span></span><span class="code">     },</span>
+<span class="number"><span>45</span></span><span class="code">     &quot;execution_count&quot;: 2,</span>
+<span class="number"><span>46</span></span><span class="code">     &quot;metadata&quot;: {},</span>
+<span class="number"><span>47</span></span><span class="code">     &quot;output_type&quot;: &quot;execute_result&quot;</span>
+<span class="number"><span>48</span></span><span class="code">    }</span>
+<span class="number"><span>49</span></span><span class="code">   ],</span>
+<span class="number"><span>50</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>51</span></span><span class="code">    &quot;s=8\n&quot;,</span>
+<span class="number"><span>52</span></span><span class="code">    &quot;a = rand(8,6)\n&quot;,</span>
+<span class="number"><span>53</span></span><span class="code">    &quot;[a[i,j]=10^i+j for i in 1:8 for j in 1:6]\n&quot;,</span>
+<span class="number"><span>54</span></span><span class="code">    &quot;mu= VecArray{s,Float64,2}(a)\n&quot;,</span>
+<span class="number"><span>55</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>56</span></span><span class="code">    &quot;mu[6] = mu[1]*mu[2] + mu[3]*mu[4] + sin(mu[5])&quot;</span>
+<span class="number"><span>57</span></span><span class="code">   ]</span>
+<span class="number"><span>58</span></span><span class="code">  },</span>
+<span class="number"><span>59</span></span><span class="code">  {</span>
+<span class="number"><span>60</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>61</span></span><span class="code">   &quot;execution_count&quot;: 11,</span>
+<span class="number"><span>62</span></span><span class="code">   &quot;id&quot;: &quot;c401f817&quot;,</span>
+<span class="number"><span>63</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>64</span></span><span class="code">   &quot;outputs&quot;: [</span>
+<span class="number"><span>65</span></span><span class="code">    {</span>
+<span class="number"><span>66</span></span><span class="code">     &quot;data&quot;: {</span>
+<span class="number"><span>67</span></span><span class="code">      &quot;text/plain&quot;: [</span>
+<span class="number"><span>68</span></span><span class="code">       &quot;&lt;8 x Float64&gt;[11.0, 101.0, 1001.0, 10001.0, 100001.0, 1.000001e6, 1.0000001e7, 1.00000001e8]&quot;</span>
+<span class="number"><span>69</span></span><span class="code">      ]</span>
+<span class="number"><span>70</span></span><span class="code">     },</span>
+<span class="number"><span>71</span></span><span class="code">     &quot;execution_count&quot;: 11,</span>
+<span class="number"><span>72</span></span><span class="code">     &quot;metadata&quot;: {},</span>
+<span class="number"><span>73</span></span><span class="code">     &quot;output_type&quot;: &quot;execute_result&quot;</span>
+<span class="number"><span>74</span></span><span class="code">    }</span>
+<span class="number"><span>75</span></span><span class="code">   ],</span>
+<span class="number"><span>76</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>77</span></span><span class="code">    &quot;mu[1]&quot;</span>
+<span class="number"><span>78</span></span><span class="code">   ]</span>
+<span class="number"><span>79</span></span><span class="code">  },</span>
+<span class="number"><span>80</span></span><span class="code">  {</span>
+<span class="number"><span>81</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>82</span></span><span class="code">   &quot;execution_count&quot;: 14,</span>
+<span class="number"><span>83</span></span><span class="code">   &quot;id&quot;: &quot;cfbe6737&quot;,</span>
+<span class="number"><span>84</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>85</span></span><span class="code">   &quot;outputs&quot;: [</span>
+<span class="number"><span>86</span></span><span class="code">    {</span>
+<span class="number"><span>87</span></span><span class="code">     &quot;data&quot;: {</span>
+<span class="number"><span>88</span></span><span class="code">      &quot;text/plain&quot;: [</span>
+<span class="number"><span>89</span></span><span class="code">       &quot;&lt;8 x Float64&gt;[12.0, 102.0, 1002.0, 10002.0, 100002.0, 1.000002e6, 1.0000002e7, 1.00000002e8]&quot;</span>
+<span class="number"><span>90</span></span><span class="code">      ]</span>
+<span class="number"><span>91</span></span><span class="code">     },</span>
+<span class="number"><span>92</span></span><span class="code">     &quot;execution_count&quot;: 14,</span>
+<span class="number"><span>93</span></span><span class="code">     &quot;metadata&quot;: {},</span>
+<span class="number"><span>94</span></span><span class="code">     &quot;output_type&quot;: &quot;execute_result&quot;</span>
+<span class="number"><span>95</span></span><span class="code">    }</span>
+<span class="number"><span>96</span></span><span class="code">   ],</span>
+<span class="number"><span>97</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>98</span></span><span class="code">    &quot;mu[2]&quot;</span>
+<span class="number"><span>99</span></span><span class="code">   ]</span>
+<span class="number"><span>100</span></span><span class="code">  },</span>
+<span class="number"><span>101</span></span><span class="code">  {</span>
+<span class="number"><span>102</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>103</span></span><span class="code">   &quot;execution_count&quot;: 4,</span>
+<span class="number"><span>104</span></span><span class="code">   &quot;id&quot;: &quot;365a7593&quot;,</span>
+<span class="number"><span>105</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>106</span></span><span class="code">   &quot;outputs&quot;: [],</span>
+<span class="number"><span>107</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>108</span></span><span class="code">    &quot;setindex_!(mu, 0., 1)&quot;</span>
+<span class="number"><span>109</span></span><span class="code">   ]</span>
+<span class="number"><span>110</span></span><span class="code">  },</span>
+<span class="number"><span>111</span></span><span class="code">  {</span>
+<span class="number"><span>112</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>113</span></span><span class="code">   &quot;execution_count&quot;: 6,</span>
+<span class="number"><span>114</span></span><span class="code">   &quot;id&quot;: &quot;ea00c916&quot;,</span>
+<span class="number"><span>115</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>116</span></span><span class="code">   &quot;outputs&quot;: [</span>
+<span class="number"><span>117</span></span><span class="code">    {</span>
+<span class="number"><span>118</span></span><span class="code">     &quot;data&quot;: {</span>
+<span class="number"><span>119</span></span><span class="code">      &quot;text/plain&quot;: [</span>
+<span class="number"><span>120</span></span><span class="code">       &quot;&lt;8 x Float64&gt;[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]&quot;</span>
+<span class="number"><span>121</span></span><span class="code">      ]</span>
+<span class="number"><span>122</span></span><span class="code">     },</span>
+<span class="number"><span>123</span></span><span class="code">     &quot;execution_count&quot;: 6,</span>
+<span class="number"><span>124</span></span><span class="code">     &quot;metadata&quot;: {},</span>
+<span class="number"><span>125</span></span><span class="code">     &quot;output_type&quot;: &quot;execute_result&quot;</span>
+<span class="number"><span>126</span></span><span class="code">    }</span>
+<span class="number"><span>127</span></span><span class="code">   ],</span>
+<span class="number"><span>128</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>129</span></span><span class="code">    &quot;mu[1]&quot;</span>
+<span class="number"><span>130</span></span><span class="code">   ]</span>
+<span class="number"><span>131</span></span><span class="code">  },</span>
+<span class="number"><span>132</span></span><span class="code">  {</span>
+<span class="number"><span>133</span></span><span class="code">   &quot;cell_type&quot;: &quot;markdown&quot;,</span>
+<span class="number"><span>134</span></span><span class="code">   &quot;id&quot;: &quot;80e866c2&quot;,</span>
+<span class="number"><span>135</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>136</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>137</span></span><span class="code">    &quot;## Hiru dimentsio&quot;</span>
+<span class="number"><span>138</span></span><span class="code">   ]</span>
+<span class="number"><span>139</span></span><span class="code">  },</span>
+<span class="number"><span>140</span></span><span class="code">  {</span>
+<span class="number"><span>141</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>142</span></span><span class="code">   &quot;execution_count&quot;: 98,</span>
+<span class="number"><span>143</span></span><span class="code">   &quot;id&quot;: &quot;d2c8c69e&quot;,</span>
+<span class="number"><span>144</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>145</span></span><span class="code">   &quot;outputs&quot;: [</span>
+<span class="number"><span>146</span></span><span class="code">    {</span>
+<span class="number"><span>147</span></span><span class="code">     &quot;data&quot;: {</span>
+<span class="number"><span>148</span></span><span class="code">      &quot;text/plain&quot;: [</span>
+<span class="number"><span>149</span></span><span class="code">       &quot;8×3×2 Array{Float64, 3}:\n&quot;,</span>
+<span class="number"><span>150</span></span><span class="code">       &quot;[:, :, 1] =\n&quot;,</span>
+<span class="number"><span>151</span></span><span class="code">       &quot;   1.0    2.0    3.0\n&quot;,</span>
+<span class="number"><span>152</span></span><span class="code">       &quot;   1.0    2.0    3.0\n&quot;,</span>
+<span class="number"><span>153</span></span><span class="code">       &quot;   1.0    2.0    3.0\n&quot;,</span>
+<span class="number"><span>154</span></span><span class="code">       &quot;   1.0    2.0    3.0\n&quot;,</span>
+<span class="number"><span>155</span></span><span class="code">       &quot;   1.0    2.0    3.0\n&quot;,</span>
+<span class="number"><span>156</span></span><span class="code">       &quot;   1.0    2.0    3.0\n&quot;,</span>
+<span class="number"><span>157</span></span><span class="code">       &quot;   1.0    2.0    3.0\n&quot;,</span>
+<span class="number"><span>158</span></span><span class="code">       &quot; 101.0  102.0  103.0\n&quot;,</span>
+<span class="number"><span>159</span></span><span class="code">       &quot;\n&quot;,</span>
+<span class="number"><span>160</span></span><span class="code">       &quot;[:, :, 2] =\n&quot;,</span>
+<span class="number"><span>161</span></span><span class="code">       &quot;   4.0    5.0    6.0\n&quot;,</span>
+<span class="number"><span>162</span></span><span class="code">       &quot;   4.0    5.0    6.0\n&quot;,</span>
+<span class="number"><span>163</span></span><span class="code">       &quot;   4.0    5.0    6.0\n&quot;,</span>
+<span class="number"><span>164</span></span><span class="code">       &quot;   4.0    5.0    6.0\n&quot;,</span>
+<span class="number"><span>165</span></span><span class="code">       &quot;   4.0    5.0    6.0\n&quot;,</span>
+<span class="number"><span>166</span></span><span class="code">       &quot;   4.0    5.0    6.0\n&quot;,</span>
+<span class="number"><span>167</span></span><span class="code">       &quot;   4.0    5.0    6.0\n&quot;,</span>
+<span class="number"><span>168</span></span><span class="code">       &quot; 201.0  202.0  203.0&quot;</span>
+<span class="number"><span>169</span></span><span class="code">      ]</span>
+<span class="number"><span>170</span></span><span class="code">     },</span>
+<span class="number"><span>171</span></span><span class="code">     &quot;execution_count&quot;: 98,</span>
+<span class="number"><span>172</span></span><span class="code">     &quot;metadata&quot;: {},</span>
+<span class="number"><span>173</span></span><span class="code">     &quot;output_type&quot;: &quot;execute_result&quot;</span>
+<span class="number"><span>174</span></span><span class="code">    }</span>
+<span class="number"><span>175</span></span><span class="code">   ],</span>
+<span class="number"><span>176</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>177</span></span><span class="code">    &quot;s = 8\n&quot;,</span>
+<span class="number"><span>178</span></span><span class="code">    &quot;dat = rand(s,3,2)\n&quot;,</span>
+<span class="number"><span>179</span></span><span class="code">    &quot;[dat[1:8,k,1].=k for k in 1:3]\n&quot;,</span>
+<span class="number"><span>180</span></span><span class="code">    &quot;[dat[1:8,k,2].=3+k for k in 1:3]\n&quot;,</span>
+<span class="number"><span>181</span></span><span class="code">    &quot;[dat[8,k,1]=100+k for k in 1:3]\n&quot;,</span>
+<span class="number"><span>182</span></span><span class="code">    &quot;[dat[8,k,2]=200+k for k in 1:3]    \n&quot;,</span>
+<span class="number"><span>183</span></span><span class="code">    &quot;dat&quot;</span>
+<span class="number"><span>184</span></span><span class="code">   ]</span>
+<span class="number"><span>185</span></span><span class="code">  },</span>
+<span class="number"><span>186</span></span><span class="code">  {</span>
+<span class="number"><span>187</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>188</span></span><span class="code">   &quot;execution_count&quot;: 100,</span>
+<span class="number"><span>189</span></span><span class="code">   &quot;id&quot;: &quot;b867a503&quot;,</span>
+<span class="number"><span>190</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>191</span></span><span class="code">   &quot;outputs&quot;: [],</span>
+<span class="number"><span>192</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>193</span></span><span class="code">    &quot;B = VecArray{s,Float64,3}(dat);&quot;</span>
+<span class="number"><span>194</span></span><span class="code">   ]</span>
+<span class="number"><span>195</span></span><span class="code">  },</span>
+<span class="number"><span>196</span></span><span class="code">  {</span>
+<span class="number"><span>197</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>198</span></span><span class="code">   &quot;execution_count&quot;: 34,</span>
+<span class="number"><span>199</span></span><span class="code">   &quot;id&quot;: &quot;795dc9db&quot;,</span>
+<span class="number"><span>200</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>201</span></span><span class="code">   &quot;outputs&quot;: [</span>
+<span class="number"><span>202</span></span><span class="code">    {</span>
+<span class="number"><span>203</span></span><span class="code">     &quot;data&quot;: {</span>
+<span class="number"><span>204</span></span><span class="code">      &quot;text/plain&quot;: [</span>
+<span class="number"><span>205</span></span><span class="code">       &quot;&lt;8 x Float64&gt;[3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0]&quot;</span>
+<span class="number"><span>206</span></span><span class="code">      ]</span>
+<span class="number"><span>207</span></span><span class="code">     },</span>
+<span class="number"><span>208</span></span><span class="code">     &quot;execution_count&quot;: 34,</span>
+<span class="number"><span>209</span></span><span class="code">     &quot;metadata&quot;: {},</span>
+<span class="number"><span>210</span></span><span class="code">     &quot;output_type&quot;: &quot;execute_result&quot;</span>
+<span class="number"><span>211</span></span><span class="code">    }</span>
+<span class="number"><span>212</span></span><span class="code">   ],</span>
+<span class="number"><span>213</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>214</span></span><span class="code">    &quot;B[3,1]&quot;</span>
+<span class="number"><span>215</span></span><span class="code">   ]</span>
+<span class="number"><span>216</span></span><span class="code">  },</span>
+<span class="number"><span>217</span></span><span class="code">  {</span>
+<span class="number"><span>218</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>219</span></span><span class="code">   &quot;execution_count&quot;: 93,</span>
+<span class="number"><span>220</span></span><span class="code">   &quot;id&quot;: &quot;80510178&quot;,</span>
+<span class="number"><span>221</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>222</span></span><span class="code">   &quot;outputs&quot;: [</span>
+<span class="number"><span>223</span></span><span class="code">    {</span>
+<span class="number"><span>224</span></span><span class="code">     &quot;data&quot;: {</span>
+<span class="number"><span>225</span></span><span class="code">      &quot;text/plain&quot;: [</span>
+<span class="number"><span>226</span></span><span class="code">       &quot;3.0&quot;</span>
+<span class="number"><span>227</span></span><span class="code">      ]</span>
+<span class="number"><span>228</span></span><span class="code">     },</span>
+<span class="number"><span>229</span></span><span class="code">     &quot;execution_count&quot;: 93,</span>
+<span class="number"><span>230</span></span><span class="code">     &quot;metadata&quot;: {},</span>
+<span class="number"><span>231</span></span><span class="code">     &quot;output_type&quot;: &quot;execute_result&quot;</span>
+<span class="number"><span>232</span></span><span class="code">    }</span>
+<span class="number"><span>233</span></span><span class="code">   ],</span>
+<span class="number"><span>234</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>235</span></span><span class="code">    &quot;B.data[6+8+8]&quot;</span>
+<span class="number"><span>236</span></span><span class="code">   ]</span>
+<span class="number"><span>237</span></span><span class="code">  },</span>
+<span class="number"><span>238</span></span><span class="code">  {</span>
+<span class="number"><span>239</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>240</span></span><span class="code">   &quot;execution_count&quot;: 101,</span>
+<span class="number"><span>241</span></span><span class="code">   &quot;id&quot;: &quot;d52ae6c9&quot;,</span>
+<span class="number"><span>242</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>243</span></span><span class="code">   &quot;outputs&quot;: [</span>
+<span class="number"><span>244</span></span><span class="code">    {</span>
+<span class="number"><span>245</span></span><span class="code">     &quot;data&quot;: {</span>
+<span class="number"><span>246</span></span><span class="code">      &quot;text/plain&quot;: [</span>
+<span class="number"><span>247</span></span><span class="code">       &quot;6-element Vector{Float64}:\n&quot;,</span>
+<span class="number"><span>248</span></span><span class="code">       &quot; 101.0\n&quot;,</span>
+<span class="number"><span>249</span></span><span class="code">       &quot; 102.0\n&quot;,</span>
+<span class="number"><span>250</span></span><span class="code">       &quot; 103.0\n&quot;,</span>
+<span class="number"><span>251</span></span><span class="code">       &quot; 201.0\n&quot;,</span>
+<span class="number"><span>252</span></span><span class="code">       &quot; 202.0\n&quot;,</span>
+<span class="number"><span>253</span></span><span class="code">       &quot; 203.0&quot;</span>
+<span class="number"><span>254</span></span><span class="code">      ]</span>
+<span class="number"><span>255</span></span><span class="code">     },</span>
+<span class="number"><span>256</span></span><span class="code">     &quot;execution_count&quot;: 101,</span>
+<span class="number"><span>257</span></span><span class="code">     &quot;metadata&quot;: {},</span>
+<span class="number"><span>258</span></span><span class="code">     &quot;output_type&quot;: &quot;execute_result&quot;</span>
+<span class="number"><span>259</span></span><span class="code">    }</span>
+<span class="number"><span>260</span></span><span class="code">   ],</span>
+<span class="number"><span>261</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>262</span></span><span class="code">    &quot;datas=zeros(6)\n&quot;,</span>
+<span class="number"><span>263</span></span><span class="code">    &quot;[datas[k]=B.data[k*s] for k in 1:6]    &quot;</span>
+<span class="number"><span>264</span></span><span class="code">   ]</span>
+<span class="number"><span>265</span></span><span class="code">  },</span>
+<span class="number"><span>266</span></span><span class="code">  {</span>
+<span class="number"><span>267</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>268</span></span><span class="code">   &quot;execution_count&quot;: 85,</span>
+<span class="number"><span>269</span></span><span class="code">   &quot;id&quot;: &quot;e83a6798&quot;,</span>
+<span class="number"><span>270</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>271</span></span><span class="code">   &quot;outputs&quot;: [</span>
+<span class="number"><span>272</span></span><span class="code">    {</span>
+<span class="number"><span>273</span></span><span class="code">     &quot;data&quot;: {</span>
+<span class="number"><span>274</span></span><span class="code">      &quot;text/plain&quot;: [</span>
+<span class="number"><span>275</span></span><span class="code">       &quot;6-element Vector{Float64}:\n&quot;,</span>
+<span class="number"><span>276</span></span><span class="code">       &quot; 6.0\n&quot;,</span>
+<span class="number"><span>277</span></span><span class="code">       &quot; 6.0\n&quot;,</span>
+<span class="number"><span>278</span></span><span class="code">       &quot; 6.0\n&quot;,</span>
+<span class="number"><span>279</span></span><span class="code">       &quot; 6.0\n&quot;,</span>
+<span class="number"><span>280</span></span><span class="code">       &quot; 6.0\n&quot;,</span>
+<span class="number"><span>281</span></span><span class="code">       &quot; 6.0&quot;</span>
+<span class="number"><span>282</span></span><span class="code">      ]</span>
+<span class="number"><span>283</span></span><span class="code">     },</span>
+<span class="number"><span>284</span></span><span class="code">     &quot;execution_count&quot;: 85,</span>
+<span class="number"><span>285</span></span><span class="code">     &quot;metadata&quot;: {},</span>
+<span class="number"><span>286</span></span><span class="code">     &quot;output_type&quot;: &quot;execute_result&quot;</span>
+<span class="number"><span>287</span></span><span class="code">    }</span>
+<span class="number"><span>288</span></span><span class="code">   ],</span>
+<span class="number"><span>289</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>290</span></span><span class="code">    &quot;B.data[end-5:end]&quot;</span>
+<span class="number"><span>291</span></span><span class="code">   ]</span>
+<span class="number"><span>292</span></span><span class="code">  },</span>
+<span class="number"><span>293</span></span><span class="code">  {</span>
+<span class="number"><span>294</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>295</span></span><span class="code">   &quot;execution_count&quot;: 50,</span>
+<span class="number"><span>296</span></span><span class="code">   &quot;id&quot;: &quot;699fcb52&quot;,</span>
+<span class="number"><span>297</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>298</span></span><span class="code">   &quot;outputs&quot;: [</span>
+<span class="number"><span>299</span></span><span class="code">    {</span>
+<span class="number"><span>300</span></span><span class="code">     &quot;data&quot;: {</span>
+<span class="number"><span>301</span></span><span class="code">      &quot;text/plain&quot;: [</span>
+<span class="number"><span>302</span></span><span class="code">       &quot;&lt;8 x Float64&gt;[6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0]&quot;</span>
+<span class="number"><span>303</span></span><span class="code">      ]</span>
+<span class="number"><span>304</span></span><span class="code">     },</span>
+<span class="number"><span>305</span></span><span class="code">     &quot;execution_count&quot;: 50,</span>
+<span class="number"><span>306</span></span><span class="code">     &quot;metadata&quot;: {},</span>
+<span class="number"><span>307</span></span><span class="code">     &quot;output_type&quot;: &quot;execute_result&quot;</span>
+<span class="number"><span>308</span></span><span class="code">    }</span>
+<span class="number"><span>309</span></span><span class="code">   ],</span>
+<span class="number"><span>310</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>311</span></span><span class="code">    &quot;Wk_a=getindex_(B,6)&quot;</span>
+<span class="number"><span>312</span></span><span class="code">   ]</span>
+<span class="number"><span>313</span></span><span class="code">  },</span>
+<span class="number"><span>314</span></span><span class="code">  {</span>
+<span class="number"><span>315</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>316</span></span><span class="code">   &quot;execution_count&quot;: 37,</span>
+<span class="number"><span>317</span></span><span class="code">   &quot;id&quot;: &quot;b31ed5d4&quot;,</span>
+<span class="number"><span>318</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>319</span></span><span class="code">   &quot;outputs&quot;: [</span>
+<span class="number"><span>320</span></span><span class="code">    {</span>
+<span class="number"><span>321</span></span><span class="code">     &quot;data&quot;: {</span>
+<span class="number"><span>322</span></span><span class="code">      &quot;text/plain&quot;: [</span>
+<span class="number"><span>323</span></span><span class="code">       &quot;6.0&quot;</span>
+<span class="number"><span>324</span></span><span class="code">      ]</span>
+<span class="number"><span>325</span></span><span class="code">     },</span>
+<span class="number"><span>326</span></span><span class="code">     &quot;execution_count&quot;: 37,</span>
+<span class="number"><span>327</span></span><span class="code">     &quot;metadata&quot;: {},</span>
+<span class="number"><span>328</span></span><span class="code">     &quot;output_type&quot;: &quot;execute_result&quot;</span>
+<span class="number"><span>329</span></span><span class="code">    }</span>
+<span class="number"><span>330</span></span><span class="code">   ],</span>
+<span class="number"><span>331</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>332</span></span><span class="code">    &quot;Wk_a[1]&quot;</span>
+<span class="number"><span>333</span></span><span class="code">   ]</span>
+<span class="number"><span>334</span></span><span class="code">  },</span>
+<span class="number"><span>335</span></span><span class="code">  {</span>
+<span class="number"><span>336</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>337</span></span><span class="code">   &quot;execution_count&quot;: 38,</span>
+<span class="number"><span>338</span></span><span class="code">   &quot;id&quot;: &quot;f4fc7ce5&quot;,</span>
+<span class="number"><span>339</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>340</span></span><span class="code">   &quot;outputs&quot;: [</span>
+<span class="number"><span>341</span></span><span class="code">    {</span>
+<span class="number"><span>342</span></span><span class="code">     &quot;data&quot;: {</span>
+<span class="number"><span>343</span></span><span class="code">      &quot;text/plain&quot;: [</span>
+<span class="number"><span>344</span></span><span class="code">       &quot;&lt;8 x Float64&gt;[6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0]&quot;</span>
+<span class="number"><span>345</span></span><span class="code">      ]</span>
+<span class="number"><span>346</span></span><span class="code">     },</span>
+<span class="number"><span>347</span></span><span class="code">     &quot;execution_count&quot;: 38,</span>
+<span class="number"><span>348</span></span><span class="code">     &quot;metadata&quot;: {},</span>
+<span class="number"><span>349</span></span><span class="code">     &quot;output_type&quot;: &quot;execute_result&quot;</span>
+<span class="number"><span>350</span></span><span class="code">    }</span>
+<span class="number"><span>351</span></span><span class="code">   ],</span>
+<span class="number"><span>352</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>353</span></span><span class="code">    &quot;Wk_b=getindex(B,6)&quot;</span>
+<span class="number"><span>354</span></span><span class="code">   ]</span>
+<span class="number"><span>355</span></span><span class="code">  },</span>
+<span class="number"><span>356</span></span><span class="code">  {</span>
+<span class="number"><span>357</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>358</span></span><span class="code">   &quot;execution_count&quot;: 39,</span>
+<span class="number"><span>359</span></span><span class="code">   &quot;id&quot;: &quot;4a22a204&quot;,</span>
+<span class="number"><span>360</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>361</span></span><span class="code">   &quot;outputs&quot;: [</span>
+<span class="number"><span>362</span></span><span class="code">    {</span>
+<span class="number"><span>363</span></span><span class="code">     &quot;data&quot;: {</span>
+<span class="number"><span>364</span></span><span class="code">      &quot;text/plain&quot;: [</span>
+<span class="number"><span>365</span></span><span class="code">       &quot;6.0&quot;</span>
+<span class="number"><span>366</span></span><span class="code">      ]</span>
+<span class="number"><span>367</span></span><span class="code">     },</span>
+<span class="number"><span>368</span></span><span class="code">     &quot;execution_count&quot;: 39,</span>
+<span class="number"><span>369</span></span><span class="code">     &quot;metadata&quot;: {},</span>
+<span class="number"><span>370</span></span><span class="code">     &quot;output_type&quot;: &quot;execute_result&quot;</span>
+<span class="number"><span>371</span></span><span class="code">    }</span>
+<span class="number"><span>372</span></span><span class="code">   ],</span>
+<span class="number"><span>373</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>374</span></span><span class="code">    &quot;Wk_b[1]&quot;</span>
+<span class="number"><span>375</span></span><span class="code">   ]</span>
+<span class="number"><span>376</span></span><span class="code">  },</span>
+<span class="number"><span>377</span></span><span class="code">  {</span>
+<span class="number"><span>378</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>379</span></span><span class="code">   &quot;execution_count&quot;: 40,</span>
+<span class="number"><span>380</span></span><span class="code">   &quot;id&quot;: &quot;ce959d47&quot;,</span>
+<span class="number"><span>381</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>382</span></span><span class="code">   &quot;outputs&quot;: [</span>
+<span class="number"><span>383</span></span><span class="code">    {</span>
+<span class="number"><span>384</span></span><span class="code">     &quot;data&quot;: {</span>
+<span class="number"><span>385</span></span><span class="code">      &quot;text/plain&quot;: [</span>
+<span class="number"><span>386</span></span><span class="code">       &quot;&lt;8 x Float64&gt;[66.0, 606.0, 6006.0, 60006.0, 600006.0, 6.000006e6, 6.0000006e7, 6.00000006e8]&quot;</span>
+<span class="number"><span>387</span></span><span class="code">      ]</span>
+<span class="number"><span>388</span></span><span class="code">     },</span>
+<span class="number"><span>389</span></span><span class="code">     &quot;execution_count&quot;: 40,</span>
+<span class="number"><span>390</span></span><span class="code">     &quot;metadata&quot;: {},</span>
+<span class="number"><span>391</span></span><span class="code">     &quot;output_type&quot;: &quot;execute_result&quot;</span>
+<span class="number"><span>392</span></span><span class="code">    }</span>
+<span class="number"><span>393</span></span><span class="code">   ],</span>
+<span class="number"><span>394</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>395</span></span><span class="code">    &quot;duk=muladd(mu[1],Wk_b[1],0.)&quot;</span>
+<span class="number"><span>396</span></span><span class="code">   ]</span>
+<span class="number"><span>397</span></span><span class="code">  },</span>
+<span class="number"><span>398</span></span><span class="code">  {</span>
+<span class="number"><span>399</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>400</span></span><span class="code">   &quot;execution_count&quot;: 41,</span>
+<span class="number"><span>401</span></span><span class="code">   &quot;id&quot;: &quot;8fe3672d&quot;,</span>
+<span class="number"><span>402</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>403</span></span><span class="code">   &quot;outputs&quot;: [</span>
+<span class="number"><span>404</span></span><span class="code">    {</span>
+<span class="number"><span>405</span></span><span class="code">     &quot;data&quot;: {</span>
+<span class="number"><span>406</span></span><span class="code">      &quot;text/plain&quot;: [</span>
+<span class="number"><span>407</span></span><span class="code">       &quot;&lt;8 x Float64&gt;[72.0, 612.0, 6012.0, 60012.0, 600012.0, 6.000012e6, 6.0000012e7, 6.00000012e8]&quot;</span>
+<span class="number"><span>408</span></span><span class="code">      ]</span>
+<span class="number"><span>409</span></span><span class="code">     },</span>
+<span class="number"><span>410</span></span><span class="code">     &quot;execution_count&quot;: 41,</span>
+<span class="number"><span>411</span></span><span class="code">     &quot;metadata&quot;: {},</span>
+<span class="number"><span>412</span></span><span class="code">     &quot;output_type&quot;: &quot;execute_result&quot;</span>
+<span class="number"><span>413</span></span><span class="code">    }</span>
+<span class="number"><span>414</span></span><span class="code">   ],</span>
+<span class="number"><span>415</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>416</span></span><span class="code">    &quot;duk=muladd(mu[2],Wk_b[2],0.)&quot;</span>
+<span class="number"><span>417</span></span><span class="code">   ]</span>
+<span class="number"><span>418</span></span><span class="code">  },</span>
+<span class="number"><span>419</span></span><span class="code">  {</span>
+<span class="number"><span>420</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>421</span></span><span class="code">   &quot;execution_count&quot;: 42,</span>
+<span class="number"><span>422</span></span><span class="code">   &quot;id&quot;: &quot;fb7dd9f4&quot;,</span>
+<span class="number"><span>423</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>424</span></span><span class="code">   &quot;outputs&quot;: [</span>
+<span class="number"><span>425</span></span><span class="code">    {</span>
+<span class="number"><span>426</span></span><span class="code">     &quot;ename&quot;: &quot;LoadError&quot;,</span>
+<span class="number"><span>427</span></span><span class="code">     &quot;evalue&quot;: &quot;MethodError: no method matching *(::Vec{8, Float64}, ::Vector{Int64})\n\u001b[0mClosest candidates are:\n\u001b[0m  *(::Any, ::Any, \u001b[91m::Any\u001b[39m, \u001b[91m::Any...\u001b[39m) at operators.jl:560\n\u001b[0m  *(\u001b[91m::StridedMatrix{T}\u001b[39m, ::StridedVector{S}) where {T&lt;:Union{Float32, Float64, ComplexF32, ComplexF64}, S&lt;:Real} at /buildworker/worker/package_linux64/build/usr/share/julia/stdlib/v1.6/LinearAlgebra/src/matmul.jl:44\n\u001b[0m  *(\u001b[91m::Union{SparseArrays.AbstractSparseMatrixCSC{TA, Ti}, SubArray{TA, 2, var\&quot;#s814\&quot;, Tuple{Base.Slice{Base.OneTo{Int64}}, I}, L} where {I&lt;:AbstractUnitRange, var\&quot;#s814\&quot;&lt;:SparseArrays.AbstractSparseMatrixCSC{TA, Ti}, L}} where Ti\u001b[39m, ::Union{StridedVector{T} where T, BitVector}) where TA at /buildworker/worker/package_linux64/build/usr/share/julia/stdlib/v1.6/SparseArrays/src/linalg.jl:50\n\u001b[0m  ...&quot;,</span>
+<span class="number"><span>428</span></span><span class="code">     &quot;output_type&quot;: &quot;error&quot;,</span>
+<span class="number"><span>429</span></span><span class="code">     &quot;traceback&quot;: [</span>
+<span class="number"><span>430</span></span><span class="code">      &quot;MethodError: no method matching *(::Vec{8, Float64}, ::Vector{Int64})\n\u001b[0mClosest candidates are:\n\u001b[0m  *(::Any, ::Any, \u001b[91m::Any\u001b[39m, \u001b[91m::Any...\u001b[39m) at operators.jl:560\n\u001b[0m  *(\u001b[91m::StridedMatrix{T}\u001b[39m, ::StridedVector{S}) where {T&lt;:Union{Float32, Float64, ComplexF32, ComplexF64}, S&lt;:Real} at /buildworker/worker/package_linux64/build/usr/share/julia/stdlib/v1.6/LinearAlgebra/src/matmul.jl:44\n\u001b[0m  *(\u001b[91m::Union{SparseArrays.AbstractSparseMatrixCSC{TA, Ti}, SubArray{TA, 2, var\&quot;#s814\&quot;, Tuple{Base.Slice{Base.OneTo{Int64}}, I}, L} where {I&lt;:AbstractUnitRange, var\&quot;#s814\&quot;&lt;:SparseArrays.AbstractSparseMatrixCSC{TA, Ti}, L}} where Ti\u001b[39m, ::Union{StridedVector{T} where T, BitVector}) where TA at /buildworker/worker/package_linux64/build/usr/share/julia/stdlib/v1.6/SparseArrays/src/linalg.jl:50\n\u001b[0m  ...&quot;,</span>
+<span class="number"><span>431</span></span><span class="code">      &quot;&quot;,</span>
+<span class="number"><span>432</span></span><span class="code">      &quot;Stacktrace:&quot;,</span>
+<span class="number"><span>433</span></span><span class="code">      &quot; [1] top-level scope&quot;,</span>
+<span class="number"><span>434</span></span><span class="code">      &quot;   @ In[42]:1&quot;,</span>
+<span class="number"><span>435</span></span><span class="code">      &quot; [2] eval&quot;,</span>
+<span class="number"><span>436</span></span><span class="code">      &quot;   @ ./boot.jl:360 [inlined]&quot;,</span>
+<span class="number"><span>437</span></span><span class="code">      &quot; [3] include_string(mapexpr::typeof(REPL.softscope), mod::Module, code::String, filename::String)&quot;,</span>
+<span class="number"><span>438</span></span><span class="code">      &quot;   @ Base ./loading.jl:1116&quot;</span>
+<span class="number"><span>439</span></span><span class="code">     ]</span>
+<span class="number"><span>440</span></span><span class="code">    }</span>
+<span class="number"><span>441</span></span><span class="code">   ],</span>
+<span class="number"><span>442</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>443</span></span><span class="code">    &quot;duk*[1,2,3,4,5,6,7,8]&quot;</span>
+<span class="number"><span>444</span></span><span class="code">   ]</span>
+<span class="number"><span>445</span></span><span class="code">  },</span>
+<span class="number"><span>446</span></span><span class="code">  {</span>
+<span class="number"><span>447</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>448</span></span><span class="code">   &quot;execution_count&quot;: 70,</span>
+<span class="number"><span>449</span></span><span class="code">   &quot;id&quot;: &quot;fcc7fa99&quot;,</span>
+<span class="number"><span>450</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>451</span></span><span class="code">   &quot;outputs&quot;: [</span>
+<span class="number"><span>452</span></span><span class="code">    {</span>
+<span class="number"><span>453</span></span><span class="code">     &quot;data&quot;: {</span>
+<span class="number"><span>454</span></span><span class="code">      &quot;text/plain&quot;: [</span>
+<span class="number"><span>455</span></span><span class="code">       &quot;&lt;8 x Float64&gt;[1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]&quot;</span>
+<span class="number"><span>456</span></span><span class="code">      ]</span>
+<span class="number"><span>457</span></span><span class="code">     },</span>
+<span class="number"><span>458</span></span><span class="code">     &quot;execution_count&quot;: 70,</span>
+<span class="number"><span>459</span></span><span class="code">     &quot;metadata&quot;: {},</span>
+<span class="number"><span>460</span></span><span class="code">     &quot;output_type&quot;: &quot;execute_result&quot;</span>
+<span class="number"><span>461</span></span><span class="code">    }</span>
+<span class="number"><span>462</span></span><span class="code">   ],</span>
+<span class="number"><span>463</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>464</span></span><span class="code">    &quot;a_ = rand(8)\n&quot;,</span>
+<span class="number"><span>465</span></span><span class="code">    &quot;[a_[k]=k for k in 1:8]\n&quot;,</span>
+<span class="number"><span>466</span></span><span class="code">    &quot;hi1= vload(Vec{s,Float64}, a_, 1)&quot;</span>
+<span class="number"><span>467</span></span><span class="code">   ]</span>
+<span class="number"><span>468</span></span><span class="code">  },</span>
+<span class="number"><span>469</span></span><span class="code">  {</span>
+<span class="number"><span>470</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>471</span></span><span class="code">   &quot;execution_count&quot;: 44,</span>
+<span class="number"><span>472</span></span><span class="code">   &quot;id&quot;: &quot;e4d8cf0b&quot;,</span>
+<span class="number"><span>473</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>474</span></span><span class="code">   &quot;outputs&quot;: [</span>
+<span class="number"><span>475</span></span><span class="code">    {</span>
+<span class="number"><span>476</span></span><span class="code">     &quot;data&quot;: {</span>
+<span class="number"><span>477</span></span><span class="code">      &quot;text/plain&quot;: [</span>
+<span class="number"><span>478</span></span><span class="code">       &quot;&lt;8 x Float64&gt;[72.0, 1224.0, 18036.0, 240048.0, 3.00006e6, 3.6000072e7, 4.20000084e8, 4.800000096e9]&quot;</span>
+<span class="number"><span>479</span></span><span class="code">      ]</span>
+<span class="number"><span>480</span></span><span class="code">     },</span>
+<span class="number"><span>481</span></span><span class="code">     &quot;execution_count&quot;: 44,</span>
+<span class="number"><span>482</span></span><span class="code">     &quot;metadata&quot;: {},</span>
+<span class="number"><span>483</span></span><span class="code">     &quot;output_type&quot;: &quot;execute_result&quot;</span>
+<span class="number"><span>484</span></span><span class="code">    }</span>
+<span class="number"><span>485</span></span><span class="code">   ],</span>
+<span class="number"><span>486</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>487</span></span><span class="code">    &quot;duk*hi1&quot;</span>
+<span class="number"><span>488</span></span><span class="code">   ]</span>
+<span class="number"><span>489</span></span><span class="code">  },</span>
+<span class="number"><span>490</span></span><span class="code">  {</span>
+<span class="number"><span>491</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>492</span></span><span class="code">   &quot;execution_count&quot;: 45,</span>
+<span class="number"><span>493</span></span><span class="code">   &quot;id&quot;: &quot;ac16b347&quot;,</span>
+<span class="number"><span>494</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>495</span></span><span class="code">   &quot;outputs&quot;: [</span>
+<span class="number"><span>496</span></span><span class="code">    {</span>
+<span class="number"><span>497</span></span><span class="code">     &quot;data&quot;: {</span>
+<span class="number"><span>498</span></span><span class="code">      &quot;text/plain&quot;: [</span>
+<span class="number"><span>499</span></span><span class="code">       &quot;&lt;8 x Float64&gt;[72.0, 1224.0, 18036.0, 240048.0, 3.00006e6, 3.6000072e7, 4.20000084e8, 4.800000096e9]&quot;</span>
+<span class="number"><span>500</span></span><span class="code">      ]</span>
+<span class="number"><span>501</span></span><span class="code">     },</span>
+<span class="number"><span>502</span></span><span class="code">     &quot;execution_count&quot;: 45,</span>
+<span class="number"><span>503</span></span><span class="code">     &quot;metadata&quot;: {},</span>
+<span class="number"><span>504</span></span><span class="code">     &quot;output_type&quot;: &quot;execute_result&quot;</span>
+<span class="number"><span>505</span></span><span class="code">    }</span>
+<span class="number"><span>506</span></span><span class="code">   ],</span>
+<span class="number"><span>507</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>508</span></span><span class="code">    &quot;duk=duk*hi1&quot;</span>
+<span class="number"><span>509</span></span><span class="code">   ]</span>
+<span class="number"><span>510</span></span><span class="code">  },</span>
+<span class="number"><span>511</span></span><span class="code">  {</span>
+<span class="number"><span>512</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>513</span></span><span class="code">   &quot;execution_count&quot;: 20,</span>
+<span class="number"><span>514</span></span><span class="code">   &quot;id&quot;: &quot;d485e3b5&quot;,</span>
+<span class="number"><span>515</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>516</span></span><span class="code">   &quot;outputs&quot;: [</span>
+<span class="number"><span>517</span></span><span class="code">    {</span>
+<span class="number"><span>518</span></span><span class="code">     &quot;ename&quot;: &quot;LoadError&quot;,</span>
+<span class="number"><span>519</span></span><span class="code">     &quot;evalue&quot;: &quot;UndefVarError: norm not defined&quot;,</span>
+<span class="number"><span>520</span></span><span class="code">     &quot;output_type&quot;: &quot;error&quot;,</span>
+<span class="number"><span>521</span></span><span class="code">     &quot;traceback&quot;: [</span>
+<span class="number"><span>522</span></span><span class="code">      &quot;UndefVarError: norm not defined&quot;,</span>
+<span class="number"><span>523</span></span><span class="code">      &quot;&quot;,</span>
+<span class="number"><span>524</span></span><span class="code">      &quot;Stacktrace:&quot;,</span>
+<span class="number"><span>525</span></span><span class="code">      &quot; [1] top-level scope&quot;,</span>
+<span class="number"><span>526</span></span><span class="code">      &quot;   @ In[20]:1&quot;,</span>
+<span class="number"><span>527</span></span><span class="code">      &quot; [2] eval&quot;,</span>
+<span class="number"><span>528</span></span><span class="code">      &quot;   @ ./boot.jl:360 [inlined]&quot;,</span>
+<span class="number"><span>529</span></span><span class="code">      &quot; [3] include_string(mapexpr::typeof(REPL.softscope), mod::Module, code::String, filename::String)&quot;,</span>
+<span class="number"><span>530</span></span><span class="code">      &quot;   @ Base ./loading.jl:1116&quot;</span>
+<span class="number"><span>531</span></span><span class="code">     ]</span>
+<span class="number"><span>532</span></span><span class="code">    }</span>
+<span class="number"><span>533</span></span><span class="code">   ],</span>
+<span class="number"><span>534</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>535</span></span><span class="code">    &quot;norm(duk)&quot;</span>
+<span class="number"><span>536</span></span><span class="code">   ]</span>
+<span class="number"><span>537</span></span><span class="code">  },</span>
+<span class="number"><span>538</span></span><span class="code">  {</span>
+<span class="number"><span>539</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>540</span></span><span class="code">   &quot;execution_count&quot;: 21,</span>
+<span class="number"><span>541</span></span><span class="code">   &quot;id&quot;: &quot;8cc6f56e&quot;,</span>
+<span class="number"><span>542</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>543</span></span><span class="code">   &quot;outputs&quot;: [</span>
+<span class="number"><span>544</span></span><span class="code">    {</span>
+<span class="number"><span>545</span></span><span class="code">     &quot;data&quot;: {</span>
+<span class="number"><span>546</span></span><span class="code">      &quot;text/plain&quot;: [</span>
+<span class="number"><span>547</span></span><span class="code">       &quot;0.9167535968116086&quot;</span>
+<span class="number"><span>548</span></span><span class="code">      ]</span>
+<span class="number"><span>549</span></span><span class="code">     },</span>
+<span class="number"><span>550</span></span><span class="code">     &quot;execution_count&quot;: 21,</span>
+<span class="number"><span>551</span></span><span class="code">     &quot;metadata&quot;: {},</span>
+<span class="number"><span>552</span></span><span class="code">     &quot;output_type&quot;: &quot;execute_result&quot;</span>
+<span class="number"><span>553</span></span><span class="code">    }</span>
+<span class="number"><span>554</span></span><span class="code">   ],</span>
+<span class="number"><span>555</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>556</span></span><span class="code">    &quot;(sum(duk*duk))^(1/(2*s))&quot;</span>
+<span class="number"><span>557</span></span><span class="code">   ]</span>
+<span class="number"><span>558</span></span><span class="code">  },</span>
+<span class="number"><span>559</span></span><span class="code">  {</span>
+<span class="number"><span>560</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>561</span></span><span class="code">   &quot;execution_count&quot;: 22,</span>
+<span class="number"><span>562</span></span><span class="code">   &quot;id&quot;: &quot;2a3970c6&quot;,</span>
+<span class="number"><span>563</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>564</span></span><span class="code">   &quot;outputs&quot;: [</span>
+<span class="number"><span>565</span></span><span class="code">    {</span>
+<span class="number"><span>566</span></span><span class="code">     &quot;data&quot;: {</span>
+<span class="number"><span>567</span></span><span class="code">      &quot;text/plain&quot;: [</span>
+<span class="number"><span>568</span></span><span class="code">       &quot;Float64&quot;</span>
+<span class="number"><span>569</span></span><span class="code">      ]</span>
+<span class="number"><span>570</span></span><span class="code">     },</span>
+<span class="number"><span>571</span></span><span class="code">     &quot;execution_count&quot;: 22,</span>
+<span class="number"><span>572</span></span><span class="code">     &quot;metadata&quot;: {},</span>
+<span class="number"><span>573</span></span><span class="code">     &quot;output_type&quot;: &quot;execute_result&quot;</span>
+<span class="number"><span>574</span></span><span class="code">    }</span>
+<span class="number"><span>575</span></span><span class="code">   ],</span>
+<span class="number"><span>576</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>577</span></span><span class="code">    &quot;eltype(duk)&quot;</span>
+<span class="number"><span>578</span></span><span class="code">   ]</span>
+<span class="number"><span>579</span></span><span class="code">  },</span>
+<span class="number"><span>580</span></span><span class="code">  {</span>
+<span class="number"><span>581</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>582</span></span><span class="code">   &quot;execution_count&quot;: 65,</span>
+<span class="number"><span>583</span></span><span class="code">   &quot;id&quot;: &quot;5f94caf9&quot;,</span>
+<span class="number"><span>584</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>585</span></span><span class="code">   &quot;outputs&quot;: [</span>
+<span class="number"><span>586</span></span><span class="code">    {</span>
+<span class="number"><span>587</span></span><span class="code">     &quot;data&quot;: {</span>
+<span class="number"><span>588</span></span><span class="code">      &quot;text/plain&quot;: [</span>
+<span class="number"><span>589</span></span><span class="code">       &quot;&lt;8 x Float64&gt;[500.0, 1000.0, 1500.0, 2000.0, 2500.0, 3000.0, 3500.0, 4000.0]&quot;</span>
+<span class="number"><span>590</span></span><span class="code">      ]</span>
+<span class="number"><span>591</span></span><span class="code">     },</span>
+<span class="number"><span>592</span></span><span class="code">     &quot;execution_count&quot;: 65,</span>
+<span class="number"><span>593</span></span><span class="code">     &quot;metadata&quot;: {},</span>
+<span class="number"><span>594</span></span><span class="code">     &quot;output_type&quot;: &quot;execute_result&quot;</span>
+<span class="number"><span>595</span></span><span class="code">    }</span>
+<span class="number"><span>596</span></span><span class="code">   ],</span>
+<span class="number"><span>597</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>598</span></span><span class="code">    &quot;dt=500\n&quot;,</span>
+<span class="number"><span>599</span></span><span class="code">    &quot;hi1*dt&quot;</span>
+<span class="number"><span>600</span></span><span class="code">   ]</span>
+<span class="number"><span>601</span></span><span class="code">  },</span>
+<span class="number"><span>602</span></span><span class="code">  {</span>
+<span class="number"><span>603</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>604</span></span><span class="code">   &quot;execution_count&quot;: 74,</span>
+<span class="number"><span>605</span></span><span class="code">   &quot;id&quot;: &quot;7550773e&quot;,</span>
+<span class="number"><span>606</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>607</span></span><span class="code">   &quot;outputs&quot;: [],</span>
+<span class="number"><span>608</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>609</span></span><span class="code">    &quot;tt=hi1*hi1\n&quot;,</span>
+<span class="number"><span>610</span></span><span class="code">    &quot;for k in 1:1\n&quot;,</span>
+<span class="number"><span>611</span></span><span class="code">    &quot;    tt*=hi1\n&quot;,</span>
+<span class="number"><span>612</span></span><span class="code">    &quot;end&quot;</span>
+<span class="number"><span>613</span></span><span class="code">   ]</span>
+<span class="number"><span>614</span></span><span class="code">  },</span>
+<span class="number"><span>615</span></span><span class="code">  {</span>
+<span class="number"><span>616</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>617</span></span><span class="code">   &quot;execution_count&quot;: 75,</span>
+<span class="number"><span>618</span></span><span class="code">   &quot;id&quot;: &quot;be1039b9&quot;,</span>
+<span class="number"><span>619</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>620</span></span><span class="code">   &quot;outputs&quot;: [</span>
+<span class="number"><span>621</span></span><span class="code">    {</span>
+<span class="number"><span>622</span></span><span class="code">     &quot;data&quot;: {</span>
+<span class="number"><span>623</span></span><span class="code">      &quot;text/plain&quot;: [</span>
+<span class="number"><span>624</span></span><span class="code">       &quot;&lt;8 x Float64&gt;[1.0, 8.0, 27.0, 64.0, 125.0, 216.0, 343.0, 512.0]&quot;</span>
+<span class="number"><span>625</span></span><span class="code">      ]</span>
+<span class="number"><span>626</span></span><span class="code">     },</span>
+<span class="number"><span>627</span></span><span class="code">     &quot;execution_count&quot;: 75,</span>
+<span class="number"><span>628</span></span><span class="code">     &quot;metadata&quot;: {},</span>
+<span class="number"><span>629</span></span><span class="code">     &quot;output_type&quot;: &quot;execute_result&quot;</span>
+<span class="number"><span>630</span></span><span class="code">    }</span>
+<span class="number"><span>631</span></span><span class="code">   ],</span>
+<span class="number"><span>632</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>633</span></span><span class="code">    &quot;tt&quot;</span>
+<span class="number"><span>634</span></span><span class="code">   ]</span>
+<span class="number"><span>635</span></span><span class="code">  },</span>
+<span class="number"><span>636</span></span><span class="code">  {</span>
+<span class="number"><span>637</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>638</span></span><span class="code">   &quot;execution_count&quot;: 69,</span>
+<span class="number"><span>639</span></span><span class="code">   &quot;id&quot;: &quot;7a13f40b&quot;,</span>
+<span class="number"><span>640</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>641</span></span><span class="code">   &quot;outputs&quot;: [</span>
+<span class="number"><span>642</span></span><span class="code">    {</span>
+<span class="number"><span>643</span></span><span class="code">     &quot;data&quot;: {</span>
+<span class="number"><span>644</span></span><span class="code">      &quot;text/plain&quot;: [</span>
+<span class="number"><span>645</span></span><span class="code">       &quot;256&quot;</span>
+<span class="number"><span>646</span></span><span class="code">      ]</span>
+<span class="number"><span>647</span></span><span class="code">     },</span>
+<span class="number"><span>648</span></span><span class="code">     &quot;execution_count&quot;: 69,</span>
+<span class="number"><span>649</span></span><span class="code">     &quot;metadata&quot;: {},</span>
+<span class="number"><span>650</span></span><span class="code">     &quot;output_type&quot;: &quot;execute_result&quot;</span>
+<span class="number"><span>651</span></span><span class="code">    }</span>
+<span class="number"><span>652</span></span><span class="code">   ],</span>
+<span class="number"><span>653</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>654</span></span><span class="code">    &quot;2^8&quot;</span>
+<span class="number"><span>655</span></span><span class="code">   ]</span>
+<span class="number"><span>656</span></span><span class="code">  },</span>
+<span class="number"><span>657</span></span><span class="code">  {</span>
+<span class="number"><span>658</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>659</span></span><span class="code">   &quot;execution_count&quot;: 76,</span>
+<span class="number"><span>660</span></span><span class="code">   &quot;id&quot;: &quot;35edcd6c&quot;,</span>
+<span class="number"><span>661</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>662</span></span><span class="code">   &quot;outputs&quot;: [</span>
+<span class="number"><span>663</span></span><span class="code">    {</span>
+<span class="number"><span>664</span></span><span class="code">     &quot;data&quot;: {</span>
+<span class="number"><span>665</span></span><span class="code">      &quot;text/plain&quot;: [</span>
+<span class="number"><span>666</span></span><span class="code">       &quot;&lt;8 x Float64&gt;[72.0, 1224.0, 18036.0, 240048.0, 3.00006e6, 3.6000072e7, 4.20000084e8, 4.800000096e9]&quot;</span>
+<span class="number"><span>667</span></span><span class="code">      ]</span>
+<span class="number"><span>668</span></span><span class="code">     },</span>
+<span class="number"><span>669</span></span><span class="code">     &quot;execution_count&quot;: 76,</span>
+<span class="number"><span>670</span></span><span class="code">     &quot;metadata&quot;: {},</span>
+<span class="number"><span>671</span></span><span class="code">     &quot;output_type&quot;: &quot;execute_result&quot;</span>
+<span class="number"><span>672</span></span><span class="code">    }</span>
+<span class="number"><span>673</span></span><span class="code">   ],</span>
+<span class="number"><span>674</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>675</span></span><span class="code">    &quot;duk&quot;</span>
+<span class="number"><span>676</span></span><span class="code">   ]</span>
+<span class="number"><span>677</span></span><span class="code">  },</span>
+<span class="number"><span>678</span></span><span class="code">  {</span>
+<span class="number"><span>679</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>680</span></span><span class="code">   &quot;execution_count&quot;: null,</span>
+<span class="number"><span>681</span></span><span class="code">   &quot;id&quot;: &quot;caded0f2&quot;,</span>
+<span class="number"><span>682</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>683</span></span><span class="code">   &quot;outputs&quot;: [],</span>
+<span class="number"><span>684</span></span><span class="code">   &quot;source&quot;: []</span>
+<span class="number"><span>685</span></span><span class="code">  }</span>
+<span class="number"><span>686</span></span><span class="code"> ],</span>
+<span class="number"><span>687</span></span><span class="code"> &quot;metadata&quot;: {</span>
+<span class="number"><span>688</span></span><span class="code">  &quot;kernelspec&quot;: {</span>
+<span class="number"><span>689</span></span><span class="code">   &quot;display_name&quot;: &quot;Julia 1.6.6&quot;,</span>
+<span class="number"><span>690</span></span><span class="code">   &quot;language&quot;: &quot;julia&quot;,</span>
+<span class="number"><span>691</span></span><span class="code">   &quot;name&quot;: &quot;julia-1.6&quot;</span>
+<span class="number"><span>692</span></span><span class="code">  },</span>
+<span class="number"><span>693</span></span><span class="code">  &quot;language_info&quot;: {</span>
+<span class="number"><span>694</span></span><span class="code">   &quot;file_extension&quot;: &quot;.jl&quot;,</span>
+<span class="number"><span>695</span></span><span class="code">   &quot;mimetype&quot;: &quot;application/julia&quot;,</span>
+<span class="number"><span>696</span></span><span class="code">   &quot;name&quot;: &quot;julia&quot;,</span>
+<span class="number"><span>697</span></span><span class="code">   &quot;version&quot;: &quot;1.6.6&quot;</span>
+<span class="number"><span>698</span></span><span class="code">  }</span>
+<span class="number"><span>699</span></span><span class="code"> },</span>
+<span class="number"><span>700</span></span><span class="code"> &quot;nbformat&quot;: 4,</span>
+<span class="number"><span>701</span></span><span class="code"> &quot;nbformat_minor&quot;: 5</span>
+<span class="number"><span>702</span></span><span class="code">}</span>
+<span class="number"><span>703</span></span><span class="code"></span>
+</code></pre>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>
+  setTimeout(function() {
+    $(".number").css("width", "20px");
+    $(".number span").attr("class", "ln hljs-subst");
+    resize();
+    var timer = false;
+    $(window).resize(function() {
+      if (timer !== false) {
+        clearTimeout(timer);
+      }
+      timer = setTimeout(function() {
+        resize();
+      }, 200);
+    })
+
+  }, 100);
+  function resize() {
+    $("span.code").each(function(i, c) {
+      var h = $(c).height();
+      $(c).prev().height(h);
+    });
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,680 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <link rel="stylesheet" href="https://rawgithub.com/highlightjs/cdn-release/master/build/styles/github.min.css">
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/highlight.min.js"></script>
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/languages/undefined.min.js"></script>
+  <style>
+    body {
+      margin: 0px;
+      padding: 15px;
+      font-size: 12
+    }
+    .hljs {
+      margin: -15px;
+      word-wrap: break-word;
+    }
+    body, .hljs {
+      font-family: Menlo, Consolas, DejaVu Sans Mono, monospace;
+    }
+    .number {
+      float:left;
+      text-align: right;
+      display: inline-block;
+      margin-right: 5px;
+    }
+    .ln {
+      opacity: 0.5;
+    }
+    pre {
+      tab-size:      4;
+    }
+  </style>
+</head>
+<body>
+<pre><code class="jl">
+<span class="number"><span>1</span></span><span class="code"></span>
+<span class="number"><span>2</span></span><span class="code">include(&quot;IRKGL_Coefficients_adap.jl&quot;)</span>
+<span class="number"><span>3</span></span><span class="code">include(&quot;VecArray_def.jl&quot;)</span>
+<span class="number"><span>4</span></span><span class="code"></span>
+<span class="number"><span>5</span></span><span class="code"></span>
+<span class="number"><span>6</span></span><span class="code">mutable struct IRKGL_SIMD_Cache{floatType,fType,pType,s_,dim,dim_}</span>
+<span class="number"><span>7</span></span><span class="code">    odef::fType # function defining the ODE system</span>
+<span class="number"><span>8</span></span><span class="code">    p::pType # parameters and so</span>
+<span class="number"><span>9</span></span><span class="code">    b::Vec{s_,floatType}</span>
+<span class="number"><span>10</span></span><span class="code">    c::Vec{s_,floatType}</span>
+<span class="number"><span>11</span></span><span class="code">    hi1::Vec{s_,floatType}</span>
+<span class="number"><span>12</span></span><span class="code">    mu::VecArray{s_,floatType,2}</span>
+<span class="number"><span>13</span></span><span class="code">    nu::VecArray{s_,floatType,2}</span>
+<span class="number"><span>14</span></span><span class="code">    nu1::VecArray{s_,floatType,2}</span>
+<span class="number"><span>15</span></span><span class="code">    nu2::VecArray{s_,floatType,2}</span>
+<span class="number"><span>16</span></span><span class="code">    gamma::VecArray{s_,floatType,2}</span>
+<span class="number"><span>17</span></span><span class="code">    U::VecArray{s_,floatType,dim_}</span>
+<span class="number"><span>18</span></span><span class="code">    Uz::VecArray{s_,floatType,dim_}</span>
+<span class="number"><span>19</span></span><span class="code">    W::VecArray{s_,floatType,dim_}</span>
+<span class="number"><span>20</span></span><span class="code">    Wz::VecArray{s_,floatType,dim_}</span>
+<span class="number"><span>21</span></span><span class="code">#    L::VecArray{s_,floatType,dim_}</span>
+<span class="number"><span>22</span></span><span class="code">#    Lz::VecArray{s_,floatType,dim_}</span>
+<span class="number"><span>23</span></span><span class="code">    F::VecArray{s_,floatType,dim_}</span>
+<span class="number"><span>24</span></span><span class="code">    Dmin::Array{floatType,dim}</span>
+<span class="number"><span>25</span></span><span class="code">    maxiters::Int64</span>
+<span class="number"><span>26</span></span><span class="code">    step_number::Array{Int64,0}</span>
+<span class="number"><span>27</span></span><span class="code">    tau::Array{floatType,0}</span>
+<span class="number"><span>28</span></span><span class="code">    first3iters::Array{Int64,1}</span>
+<span class="number"><span>29</span></span><span class="code">    initial_interp::Array{Int64,0}</span>
+<span class="number"><span>30</span></span><span class="code">    length_u::Int64</span>
+<span class="number"><span>31</span></span><span class="code">end</span>
+<span class="number"><span>32</span></span><span class="code"></span>
+<span class="number"><span>33</span></span><span class="code"></span>
+<span class="number"><span>34</span></span><span class="code">function Rdigits(x::Real,r::Real)</span>
+<span class="number"><span>35</span></span><span class="code">    mx=r*x</span>
+<span class="number"><span>36</span></span><span class="code">    mxx=mx+x</span>
+<span class="number"><span>37</span></span><span class="code">    return mxx-mx</span>
+<span class="number"><span>38</span></span><span class="code">end</span>
+<span class="number"><span>39</span></span><span class="code"></span>
+<span class="number"><span>40</span></span><span class="code"></span>
+<span class="number"><span>41</span></span><span class="code">abstract type IRKAlgorithm{s,partitioned,initial_interp, dim,floatType,m,myoutputs} &lt;: OrdinaryDiffEqAlgorithm end</span>
+<span class="number"><span>42</span></span><span class="code">struct IRKGL_simd_adap{s,partitioned, initial_interp, dim,floatType,m,myoutputs} &lt;: IRKAlgorithm{s, partitioned, initial_interp, dim,floatType,m,myoutputs} end</span>
+<span class="number"><span>43</span></span><span class="code">IRKGL_simd_adap(;s=8,partitioned=false, initial_interp=-1, dim=1,floatType=Float64,m=1,myoutputs=false)=IRKGL_simd_adap{s,partitioned, initial_interp, dim,floatType,m,myoutputs}()</span>
+<span class="number"><span>44</span></span><span class="code"></span>
+<span class="number"><span>45</span></span><span class="code">function DiffEqBase.__solve(prob::DiffEqBase.AbstractODEProblem{uType,tType,isinplace},</span>
+<span class="number"><span>46</span></span><span class="code">    alg::IRKGL_simd_adap{s,partitioned,initial_interp, dim,floatType, m,myoutputs}, args...;</span>
+<span class="number"><span>47</span></span><span class="code">    dt,</span>
+<span class="number"><span>48</span></span><span class="code">    save_everystep=true,</span>
+<span class="number"><span>49</span></span><span class="code">    adaptive=false,</span>
+<span class="number"><span>50</span></span><span class="code">    maxiters=100,</span>
+<span class="number"><span>51</span></span><span class="code">    reltol=1e-6,</span>
+<span class="number"><span>52</span></span><span class="code">    abstol=1e-6,</span>
+<span class="number"><span>53</span></span><span class="code">    kwargs...) where {floatType&lt;: Union{Float32,Float64},uType,tType,isinplace,dim,s,m,partitioned,initial_interp,myoutputs}</span>
+<span class="number"><span>54</span></span><span class="code"></span>
+<span class="number"><span>55</span></span><span class="code">    destats = DiffEqBase.DEStats(0)</span>
+<span class="number"><span>56</span></span><span class="code">    @unpack f,u0,tspan,p,kwargs=prob</span>
+<span class="number"><span>57</span></span><span class="code">    t0=tspan[1]</span>
+<span class="number"><span>58</span></span><span class="code">    tf=tspan[2]</span>
+<span class="number"><span>59</span></span><span class="code">    tType2=eltype(tspan)</span>
+<span class="number"><span>60</span></span><span class="code">    utype = Vector{floatType}</span>
+<span class="number"><span>61</span></span><span class="code">    ttype = floatType</span>
+<span class="number"><span>62</span></span><span class="code"></span>
+<span class="number"><span>63</span></span><span class="code">    step_number = Array{Int64,0}(undef)</span>
+<span class="number"><span>64</span></span><span class="code">    step_number[] = 0</span>
+<span class="number"><span>65</span></span><span class="code">    tau=Array{floatType,0}(undef)</span>
+<span class="number"><span>66</span></span><span class="code">    tau[]=0.</span>
+<span class="number"><span>67</span></span><span class="code">    init_interp =  Array{Int64,0}(undef)</span>
+<span class="number"><span>68</span></span><span class="code">    init_interp[] = initial_interp</span>
+<span class="number"><span>69</span></span><span class="code">    first3iters=[0,0,0]</span>
+<span class="number"><span>70</span></span><span class="code"></span>
+<span class="number"><span>71</span></span><span class="code">    dts = Array{tType2}(undef, 1)</span>
+<span class="number"><span>72</span></span><span class="code"></span>
+<span class="number"><span>73</span></span><span class="code">    uiType=eltype(u0)</span>
+<span class="number"><span>74</span></span><span class="code"></span>
+<span class="number"><span>75</span></span><span class="code">    Treltol=convert(uiType,reltol)</span>
+<span class="number"><span>76</span></span><span class="code">    Tabstol=convert(uiType,abstol)</span>
+<span class="number"><span>77</span></span><span class="code"></span>
+<span class="number"><span>78</span></span><span class="code">    if (adaptive==false)</span>
+<span class="number"><span>79</span></span><span class="code">       dtprev=dt</span>
+<span class="number"><span>80</span></span><span class="code">    else</span>
+<span class="number"><span>81</span></span><span class="code">#       dtprev=zero(tType2)</span>
+<span class="number"><span>82</span></span><span class="code">       dtprev=dt</span>
+<span class="number"><span>83</span></span><span class="code">    end</span>
+<span class="number"><span>84</span></span><span class="code"></span>
+<span class="number"><span>85</span></span><span class="code">    sdt = sign(dt)</span>
+<span class="number"><span>86</span></span><span class="code">    dts=[dt,dtprev,sdt]</span>
+<span class="number"><span>87</span></span><span class="code"></span>
+<span class="number"><span>88</span></span><span class="code">    hi1_=zeros(s)</span>
+<span class="number"><span>89</span></span><span class="code">    for is in 1:s</span>
+<span class="number"><span>90</span></span><span class="code">      hi1_[is]=dt^(1-is)</span>
+<span class="number"><span>91</span></span><span class="code">    end</span>
+<span class="number"><span>92</span></span><span class="code">    hi1 = vload(Vec{s,floatType}, hi1_, 1)</span>
+<span class="number"><span>93</span></span><span class="code"></span>
+<span class="number"><span>94</span></span><span class="code">    (b_, c_, mu_, nu_, nu1_, nu2_, gamma_) = IRKGLCoefficients_adap(s,dt)</span>
+<span class="number"><span>95</span></span><span class="code">    length_u = length(u0)</span>
+<span class="number"><span>96</span></span><span class="code">    dims = size(u0)</span>
+<span class="number"><span>97</span></span><span class="code"></span>
+<span class="number"><span>98</span></span><span class="code">    c = vload(Vec{s,floatType}, c_, 1)</span>
+<span class="number"><span>99</span></span><span class="code">    b = vload(Vec{s,floatType}, b_, 1)</span>
+<span class="number"><span>100</span></span><span class="code">    nu=VecArray{s,floatType,2}(nu_)</span>
+<span class="number"><span>101</span></span><span class="code">    nu1=VecArray{s,floatType,2}(nu1_)</span>
+<span class="number"><span>102</span></span><span class="code">    nu2=VecArray{s,floatType,2}(nu2_)</span>
+<span class="number"><span>103</span></span><span class="code">    mu=VecArray{s,floatType,2}(mu_)</span>
+<span class="number"><span>104</span></span><span class="code">    gamma=VecArray{s,floatType,2}(gamma_)</span>
+<span class="number"><span>105</span></span><span class="code"></span>
+<span class="number"><span>106</span></span><span class="code">     ej=zero(u0)</span>
+<span class="number"><span>107</span></span><span class="code">     Ws=zeros(length_u)</span>
+<span class="number"><span>108</span></span><span class="code"></span>
+<span class="number"><span>109</span></span><span class="code">     u0type=typeof(u0)</span>
+<span class="number"><span>110</span></span><span class="code">     uu = u0type[]</span>
+<span class="number"><span>111</span></span><span class="code">     tt = ttype[]</span>
+<span class="number"><span>112</span></span><span class="code"></span>
+<span class="number"><span>113</span></span><span class="code">     zz=zeros(Float64, s, dims...)</span>
+<span class="number"><span>114</span></span><span class="code">     W=VecArray{s,Float64,length(dims)+1}(zz)</span>
+<span class="number"><span>115</span></span><span class="code">     Wz=deepcopy(W)</span>
+<span class="number"><span>116</span></span><span class="code">     U=deepcopy(W)</span>
+<span class="number"><span>117</span></span><span class="code">     Uz=deepcopy(W)</span>
+<span class="number"><span>118</span></span><span class="code">     F=deepcopy(W)</span>
+<span class="number"><span>119</span></span><span class="code"></span>
+<span class="number"><span>120</span></span><span class="code">    Dmin = zero(u0)</span>
+<span class="number"><span>121</span></span><span class="code"></span>
+<span class="number"><span>122</span></span><span class="code">#   if partitioned</span>
+<span class="number"><span>123</span></span><span class="code">#      length_q = div(length_u,2)</span>
+<span class="number"><span>124</span></span><span class="code">#      irknglcache = IRKNGL_SIMD_Cache(f,p,b,c,mu,nu,nu1,nu2,W,Wz, #L,Lz,</span>
+<span class="number"><span>125</span></span><span class="code">#                               F,Dmin,maxiters, step_number,first3iters,</span>
+<span class="number"><span>126</span></span><span class="code">#                               init_interp,length_u,length_q)</span>
+<span class="number"><span>127</span></span><span class="code">#  else</span>
+<span class="number"><span>128</span></span><span class="code">  irkglcache = IRKGL_SIMD_Cache(f,p,b,c,hi1,mu,nu,nu1,nu2,gamma,</span>
+<span class="number"><span>129</span></span><span class="code">                                U, Uz, W,Wz,</span>
+<span class="number"><span>130</span></span><span class="code">                                F,Dmin,maxiters,step_number,tau,first3iters,</span>
+<span class="number"><span>131</span></span><span class="code">                                init_interp,length_u)</span>
+<span class="number"><span>132</span></span><span class="code">#   end</span>
+<span class="number"><span>133</span></span><span class="code"></span>
+<span class="number"><span>134</span></span><span class="code">  iters = Float64[]</span>
+<span class="number"><span>135</span></span><span class="code"></span>
+<span class="number"><span>136</span></span><span class="code">  push!(uu,u0)</span>
+<span class="number"><span>137</span></span><span class="code">  push!(tt,t0)</span>
+<span class="number"><span>138</span></span><span class="code">  push!(iters,0.)</span>
+<span class="number"><span>139</span></span><span class="code"></span>
+<span class="number"><span>140</span></span><span class="code">  tj = [t0, zero(t0)]</span>
+<span class="number"><span>141</span></span><span class="code">  uj = copy(u0)</span>
+<span class="number"><span>142</span></span><span class="code"></span>
+<span class="number"><span>143</span></span><span class="code">  cont=true</span>
+<span class="number"><span>144</span></span><span class="code">  j=0</span>
+<span class="number"><span>145</span></span><span class="code"></span>
+<span class="number"><span>146</span></span><span class="code"></span>
+<span class="number"><span>147</span></span><span class="code">  while cont</span>
+<span class="number"><span>148</span></span><span class="code"></span>
+<span class="number"><span>149</span></span><span class="code">      println(&quot;urratsa berria------- j=&quot;, j+1, &quot;,dt=&quot;,dts[1])</span>
+<span class="number"><span>150</span></span><span class="code"></span>
+<span class="number"><span>151</span></span><span class="code">      tit=0</span>
+<span class="number"><span>152</span></span><span class="code">      k=0</span>
+<span class="number"><span>153</span></span><span class="code"></span>
+<span class="number"><span>154</span></span><span class="code">      for i in 1:m</span>
+<span class="number"><span>155</span></span><span class="code">         j+=1</span>
+<span class="number"><span>156</span></span><span class="code">         k+=1</span>
+<span class="number"><span>157</span></span><span class="code"></span>
+<span class="number"><span>158</span></span><span class="code">         irkglcache.step_number[] += 1</span>
+<span class="number"><span>159</span></span><span class="code">         if (adaptive==true)</span>
+<span class="number"><span>160</span></span><span class="code">             if (irkglcache.step_number[] ==1)</span>
+<span class="number"><span>161</span></span><span class="code">                 (status,j_iter) = IRKGLstep_fixed!(tj,uj,ej,prob,dts,irkglcache)</span>
+<span class="number"><span>162</span></span><span class="code">                 [Ws[k]=W.data[k*s] for k in 1:length_u]</span>
+<span class="number"><span>163</span></span><span class="code">                 irkglcache.tau[]=dt*norm(Ws)^(1/s)</span>
+<span class="number"><span>164</span></span><span class="code">             else</span>
+<span class="number"><span>165</span></span><span class="code">                 (status,j_iter) = IRKGLstep_adap!(tj,uj,ej,prob, dts,irkglcache)</span>
+<span class="number"><span>166</span></span><span class="code">             end</span>
+<span class="number"><span>167</span></span><span class="code">         else</span>
+<span class="number"><span>168</span></span><span class="code">             (status,j_iter) = IRKGLstep_fixed!(tj,uj,ej,prob,dts,irkglcache)</span>
+<span class="number"><span>169</span></span><span class="code">         end</span>
+<span class="number"><span>170</span></span><span class="code"></span>
+<span class="number"><span>171</span></span><span class="code">         if (status==&quot;Failure&quot;)</span>
+<span class="number"><span>172</span></span><span class="code">            println(&quot;Fail&quot;)</span>
+<span class="number"><span>173</span></span><span class="code">            sol=DiffEqBase.build_solution(prob,alg,tt,uu,retcode= :Failure)</span>
+<span class="number"><span>174</span></span><span class="code">            return(sol)</span>
+<span class="number"><span>175</span></span><span class="code">        end</span>
+<span class="number"><span>176</span></span><span class="code"></span>
+<span class="number"><span>177</span></span><span class="code">         tit+= j_iter</span>
+<span class="number"><span>178</span></span><span class="code"></span>
+<span class="number"><span>179</span></span><span class="code">         if (dts[1]==0)</span>
+<span class="number"><span>180</span></span><span class="code">            cont=false</span>
+<span class="number"><span>181</span></span><span class="code">            break</span>
+<span class="number"><span>182</span></span><span class="code">        end</span>
+<span class="number"><span>183</span></span><span class="code">      end</span>
+<span class="number"><span>184</span></span><span class="code"></span>
+<span class="number"><span>185</span></span><span class="code">      if save_everystep !=false || (cont==false)</span>
+<span class="number"><span>186</span></span><span class="code">          push!(uu,uj+ej)</span>
+<span class="number"><span>187</span></span><span class="code">          push!(tt,tj[1]+tj[2])</span>
+<span class="number"><span>188</span></span><span class="code">          push!(iters, tit/k)</span>
+<span class="number"><span>189</span></span><span class="code">      end</span>
+<span class="number"><span>190</span></span><span class="code"> end</span>
+<span class="number"><span>191</span></span><span class="code"></span>
+<span class="number"><span>192</span></span><span class="code"></span>
+<span class="number"><span>193</span></span><span class="code">  sol=DiffEqBase.build_solution(prob,alg,tt,uu,destats=destats,retcode= :Success)</span>
+<span class="number"><span>194</span></span><span class="code"></span>
+<span class="number"><span>195</span></span><span class="code">  if (myoutputs==true)</span>
+<span class="number"><span>196</span></span><span class="code">      return(sol,iters)</span>
+<span class="number"><span>197</span></span><span class="code">  else</span>
+<span class="number"><span>198</span></span><span class="code">      return(sol)</span>
+<span class="number"><span>199</span></span><span class="code">  end</span>
+<span class="number"><span>200</span></span><span class="code"></span>
+<span class="number"><span>201</span></span><span class="code">  return(sol)</span>
+<span class="number"><span>202</span></span><span class="code"></span>
+<span class="number"><span>203</span></span><span class="code">  end</span>
+<span class="number"><span>204</span></span><span class="code"></span>
+<span class="number"><span>205</span></span><span class="code"></span>
+<span class="number"><span>206</span></span><span class="code"></span>
+<span class="number"><span>207</span></span><span class="code">    function IRKGLstep_fixed!(ttj,uj,ej,prob,dts,irkglcache::IRKGL_SIMD_Cache{floatType,fType,pType,s_,dim,dim_}) where {floatType,fType,pType,s_,dim,dim_}</span>
+<span class="number"><span>208</span></span><span class="code"></span>
+<span class="number"><span>209</span></span><span class="code">       f = irkglcache.odef</span>
+<span class="number"><span>210</span></span><span class="code">       p = irkglcache.p</span>
+<span class="number"><span>211</span></span><span class="code">       b = irkglcache.b</span>
+<span class="number"><span>212</span></span><span class="code">       c = irkglcache.c</span>
+<span class="number"><span>213</span></span><span class="code">       hi1 = irkglcache.hi1</span>
+<span class="number"><span>214</span></span><span class="code">       mu = irkglcache.mu</span>
+<span class="number"><span>215</span></span><span class="code">       nu = irkglcache.nu</span>
+<span class="number"><span>216</span></span><span class="code">       nu1 = irkglcache.nu1</span>
+<span class="number"><span>217</span></span><span class="code">       nu2 = irkglcache.nu2</span>
+<span class="number"><span>218</span></span><span class="code">       U = irkglcache.U</span>
+<span class="number"><span>219</span></span><span class="code">       Uz = irkglcache.Uz</span>
+<span class="number"><span>220</span></span><span class="code">       W = irkglcache.W</span>
+<span class="number"><span>221</span></span><span class="code">       Wz = irkglcache.Wz</span>
+<span class="number"><span>222</span></span><span class="code">       gamma=irkglcache.gamma</span>
+<span class="number"><span>223</span></span><span class="code">       F = irkglcache.F</span>
+<span class="number"><span>224</span></span><span class="code">       Dmin = irkglcache.Dmin</span>
+<span class="number"><span>225</span></span><span class="code">       step_number = irkglcache.step_number[]</span>
+<span class="number"><span>226</span></span><span class="code">       first3iters = irkglcache.first3iters</span>
+<span class="number"><span>227</span></span><span class="code">       initial_interp = irkglcache.initial_interp[]</span>
+<span class="number"><span>228</span></span><span class="code">       len = irkglcache.length_u</span>
+<span class="number"><span>229</span></span><span class="code">       s = length(b)</span>
+<span class="number"><span>230</span></span><span class="code">       maxiters = (step_number==1 ? 10+irkglcache.maxiters : irkglcache.maxiters )</span>
+<span class="number"><span>231</span></span><span class="code">       tj = ttj[1]</span>
+<span class="number"><span>232</span></span><span class="code">       te = ttj[2]</span>
+<span class="number"><span>233</span></span><span class="code">       indices=1:len</span>
+<span class="number"><span>234</span></span><span class="code">       flzero = zero(floatType)</span>
+<span class="number"><span>235</span></span><span class="code"></span>
+<span class="number"><span>236</span></span><span class="code"></span>
+<span class="number"><span>237</span></span><span class="code">       dt=dts[1]</span>
+<span class="number"><span>238</span></span><span class="code">       dtz=dts[2]</span>
+<span class="number"><span>239</span></span><span class="code">       sdt=dts[3]</span>
+<span class="number"><span>240</span></span><span class="code">       tf=prob.tspan[2]</span>
+<span class="number"><span>241</span></span><span class="code"></span>
+<span class="number"><span>242</span></span><span class="code"></span>
+<span class="number"><span>243</span></span><span class="code">#       if step_number&gt;1</span>
+<span class="number"><span>244</span></span><span class="code">#           for k in indices</span>
+<span class="number"><span>245</span></span><span class="code">#               Wzk=getindex_(Wz,k)</span>
+<span class="number"><span>246</span></span><span class="code">#               setindex_!(W, Wzk, k)</span>
+<span class="number"><span>247</span></span><span class="code">#           end</span>
+<span class="number"><span>248</span></span><span class="code">#       else</span>
+<span class="number"><span>249</span></span><span class="code">#           for k in indices</span>
+<span class="number"><span>250</span></span><span class="code">#               setindex_!(W, 0., k)</span>
+<span class="number"><span>251</span></span><span class="code">#           end</span>
+<span class="number"><span>252</span></span><span class="code">#       end</span>
+<span class="number"><span>253</span></span><span class="code"></span>
+<span class="number"><span>254</span></span><span class="code">        for k in indices</span>
+<span class="number"><span>255</span></span><span class="code">            setindex_!(W, 0., k)</span>
+<span class="number"><span>256</span></span><span class="code">        end</span>
+<span class="number"><span>257</span></span><span class="code"></span>
+<span class="number"><span>258</span></span><span class="code">       cdt=c*dt</span>
+<span class="number"><span>259</span></span><span class="code">       for k in indices</span>
+<span class="number"><span>260</span></span><span class="code">          cdts=cdt</span>
+<span class="number"><span>261</span></span><span class="code">          Wk = getindex_(W,k)</span>
+<span class="number"><span>262</span></span><span class="code">          dUk = muladd(cdts,Wk[1],ej[k])</span>
+<span class="number"><span>263</span></span><span class="code">          for is in 2:s</span>
+<span class="number"><span>264</span></span><span class="code"> #            dUk=muladd((c*dt)^is,Wk[is],dUk)   # ez dabil</span>
+<span class="number"><span>265</span></span><span class="code">              cdts=cdts*cdt</span>
+<span class="number"><span>266</span></span><span class="code">              dUk=muladd(cdts,Wk[is],dUk)</span>
+<span class="number"><span>267</span></span><span class="code">          end</span>
+<span class="number"><span>268</span></span><span class="code">          Uk = uj[k]+dUk</span>
+<span class="number"><span>269</span></span><span class="code">          setindex_!(U, Uk, k)</span>
+<span class="number"><span>270</span></span><span class="code"></span>
+<span class="number"><span>271</span></span><span class="code">#          if (k==len)</span>
+<span class="number"><span>272</span></span><span class="code">#              println(&quot;Hasieraketa U[1]=&quot;,Uk[1])</span>
+<span class="number"><span>273</span></span><span class="code">#          end</span>
+<span class="number"><span>274</span></span><span class="code"></span>
+<span class="number"><span>275</span></span><span class="code">       end</span>
+<span class="number"><span>276</span></span><span class="code"></span>
+<span class="number"><span>277</span></span><span class="code"></span>
+<span class="number"><span>278</span></span><span class="code">       j_iter = 0</span>
+<span class="number"><span>279</span></span><span class="code">       Dmin .= Inf</span>
+<span class="number"><span>280</span></span><span class="code">       iter = true # Initialize iter outside the for loop</span>
+<span class="number"><span>281</span></span><span class="code">       plusIt=true</span>
+<span class="number"><span>282</span></span><span class="code">       diffU =true</span>
+<span class="number"><span>283</span></span><span class="code"></span>
+<span class="number"><span>284</span></span><span class="code">       @inbounds while (iter &amp;&amp; j_iter&lt;maxiters)</span>
+<span class="number"><span>285</span></span><span class="code"></span>
+<span class="number"><span>286</span></span><span class="code">#           println(&quot;iterazioa-fix ** j_iter=&quot;, j_iter, &quot;,dt=&quot;, dt,</span>
+<span class="number"><span>287</span></span><span class="code">#                   &quot;,iter=&quot;,iter, &quot;,diffU=&quot;,diffU, &quot;,Plusit=&quot;,plusIt)</span>
+<span class="number"><span>288</span></span><span class="code"></span>
+<span class="number"><span>289</span></span><span class="code">           Uz.data .= U.data</span>
+<span class="number"><span>290</span></span><span class="code">           Wz.data .= W.data</span>
+<span class="number"><span>291</span></span><span class="code">           j_iter += 1</span>
+<span class="number"><span>292</span></span><span class="code"></span>
+<span class="number"><span>293</span></span><span class="code">           f(F, U, p, tj + dt*c)</span>
+<span class="number"><span>294</span></span><span class="code"></span>
+<span class="number"><span>295</span></span><span class="code">           for k in indices</span>
+<span class="number"><span>296</span></span><span class="code">              Fk = getindex_(F,k)</span>
+<span class="number"><span>297</span></span><span class="code">              Wk = gamma[1]*Fk[1]</span>
+<span class="number"><span>298</span></span><span class="code">              for is in 2:s</span>
+<span class="number"><span>299</span></span><span class="code">                  Wk = muladd(gamma[is], Fk[is], Wk)</span>
+<span class="number"><span>300</span></span><span class="code">              end</span>
+<span class="number"><span>301</span></span><span class="code">              hWk=hi1*Wk</span>
+<span class="number"><span>302</span></span><span class="code">              setindex_!(W,hWk,k)</span>
+<span class="number"><span>303</span></span><span class="code">           end</span>
+<span class="number"><span>304</span></span><span class="code"></span>
+<span class="number"><span>305</span></span><span class="code">           diffU = false</span>
+<span class="number"><span>306</span></span><span class="code">           iter = false</span>
+<span class="number"><span>307</span></span><span class="code"></span>
+<span class="number"><span>308</span></span><span class="code">           cdt=c*dt</span>
+<span class="number"><span>309</span></span><span class="code">           for k in indices</span>
+<span class="number"><span>310</span></span><span class="code">              cdts=cdt</span>
+<span class="number"><span>311</span></span><span class="code">              Wk = getindex_(W,k)</span>
+<span class="number"><span>312</span></span><span class="code">              dUk = muladd(cdts,Wk[1],ej[k])</span>
+<span class="number"><span>313</span></span><span class="code">              for is in 2:s</span>
+<span class="number"><span>314</span></span><span class="code">     #            dUk=muladd((c*dt)^is,Wk[is],dUk)   # ez dabil</span>
+<span class="number"><span>315</span></span><span class="code">                  cdts=cdts*cdt</span>
+<span class="number"><span>316</span></span><span class="code">                  dUk=muladd(cdts,Wk[is],dUk)</span>
+<span class="number"><span>317</span></span><span class="code">              end</span>
+<span class="number"><span>318</span></span><span class="code">              Uk = uj[k]+dUk</span>
+<span class="number"><span>319</span></span><span class="code">              setindex_!(U, Uk, k)</span>
+<span class="number"><span>320</span></span><span class="code">              Uzk = getindex_(Uz,k)</span>
+<span class="number"><span>321</span></span><span class="code">              DY = maximum(abs(Uk-Uzk))</span>
+<span class="number"><span>322</span></span><span class="code"></span>
+<span class="number"><span>323</span></span><span class="code">              if DY&gt;0</span>
+<span class="number"><span>324</span></span><span class="code">                  diffU=true</span>
+<span class="number"><span>325</span></span><span class="code">                  if DY&lt; Dmin[k]</span>
+<span class="number"><span>326</span></span><span class="code">                     Dmin[k]=DY</span>
+<span class="number"><span>327</span></span><span class="code">                     iter=true</span>
+<span class="number"><span>328</span></span><span class="code">                  end</span>
+<span class="number"><span>329</span></span><span class="code">              end</span>
+<span class="number"><span>330</span></span><span class="code"></span>
+<span class="number"><span>331</span></span><span class="code">#              if (k==len)</span>
+<span class="number"><span>332</span></span><span class="code">#                  println(&quot;U[1]=&quot;,Uk[1])</span>
+<span class="number"><span>333</span></span><span class="code">#              end</span>
+<span class="number"><span>334</span></span><span class="code">         end</span>
+<span class="number"><span>335</span></span><span class="code"></span>
+<span class="number"><span>336</span></span><span class="code">         println(&quot;*****j_iter=&quot;, j_iter)</span>
+<span class="number"><span>337</span></span><span class="code">         println(&quot;Dmin=&quot;, Dmin )</span>
+<span class="number"><span>338</span></span><span class="code">         println(&quot;&quot;)</span>
+<span class="number"><span>339</span></span><span class="code"></span>
+<span class="number"><span>340</span></span><span class="code"></span>
+<span class="number"><span>341</span></span><span class="code">         if (!iter &amp;&amp; diffU &amp;&amp; plusIt)</span>
+<span class="number"><span>342</span></span><span class="code">            iter=true</span>
+<span class="number"><span>343</span></span><span class="code">            plusIt=false</span>
+<span class="number"><span>344</span></span><span class="code">        else</span>
+<span class="number"><span>345</span></span><span class="code">            plusIt=true </span>
+<span class="number"><span>346</span></span><span class="code">        end</span>
+<span class="number"><span>347</span></span><span class="code"></span>
+<span class="number"><span>348</span></span><span class="code">     end   # while</span>
+<span class="number"><span>349</span></span><span class="code"></span>
+<span class="number"><span>350</span></span><span class="code">     println(&quot;iterazio amaiera!!&quot;, &quot;,iter=&quot;,iter, &quot;,diffU=&quot;,diffU, &quot;,Plusit=&quot;,plusIt)</span>
+<span class="number"><span>351</span></span><span class="code"></span>
+<span class="number"><span>352</span></span><span class="code">     if (!iter &amp;&amp; j_iter==maxiters)</span>
+<span class="number"><span>353</span></span><span class="code">         println(&quot;Fail !!!  Step=&quot;,j, &quot; dt=&quot;, dts[1])</span>
+<span class="number"><span>354</span></span><span class="code">         return(&quot;Failure&quot;,0)</span>
+<span class="number"><span>355</span></span><span class="code">     end</span>
+<span class="number"><span>356</span></span><span class="code"></span>
+<span class="number"><span>357</span></span><span class="code">     @inbounds if (j_iter&lt;maxiters &amp;&amp; diffU)</span>
+<span class="number"><span>358</span></span><span class="code">        j_iter += 1</span>
+<span class="number"><span>359</span></span><span class="code">        f(F, U, p, tj + dt*c)</span>
+<span class="number"><span>360</span></span><span class="code"></span>
+<span class="number"><span>361</span></span><span class="code">        for k in indices</span>
+<span class="number"><span>362</span></span><span class="code">           Fk = getindex_(F,k)</span>
+<span class="number"><span>363</span></span><span class="code">           Wk = gamma[1]*Fk[1]</span>
+<span class="number"><span>364</span></span><span class="code">           for is in 2:s</span>
+<span class="number"><span>365</span></span><span class="code">               Wk = muladd(gamma[is], Fk[is], Wk)</span>
+<span class="number"><span>366</span></span><span class="code">           end</span>
+<span class="number"><span>367</span></span><span class="code">           hWk=hi1*Wk</span>
+<span class="number"><span>368</span></span><span class="code">           setindex_!(W,hWk, k)</span>
+<span class="number"><span>369</span></span><span class="code">        end</span>
+<span class="number"><span>370</span></span><span class="code">     end</span>
+<span class="number"><span>371</span></span><span class="code"></span>
+<span class="number"><span>372</span></span><span class="code">      Wz.data .= W.data</span>
+<span class="number"><span>373</span></span><span class="code"></span>
+<span class="number"><span>374</span></span><span class="code">      @inbounds for k in indices    #Batura konpentsatuaren parekoa</span>
+<span class="number"><span>375</span></span><span class="code">          Wk = getindex_(W,k)</span>
+<span class="number"><span>376</span></span><span class="code">          W_sum=dt*Wk[1]</span>
+<span class="number"><span>377</span></span><span class="code">          for is in 2:s</span>
+<span class="number"><span>378</span></span><span class="code">              W_sum=muladd(dt^is,Wk[is],W_sum)</span>
+<span class="number"><span>379</span></span><span class="code">          end</span>
+<span class="number"><span>380</span></span><span class="code">          res = Base.TwicePrecision(uj[k], ej[k]) + W_sum</span>
+<span class="number"><span>381</span></span><span class="code">          uj[k] = res.hi</span>
+<span class="number"><span>382</span></span><span class="code">          ej[k] = res.lo</span>
+<span class="number"><span>383</span></span><span class="code">       end</span>
+<span class="number"><span>384</span></span><span class="code"></span>
+<span class="number"><span>385</span></span><span class="code"></span>
+<span class="number"><span>386</span></span><span class="code">       res = Base.TwicePrecision(tj, te) + dt</span>
+<span class="number"><span>387</span></span><span class="code">       ttj[1] = res.hi</span>
+<span class="number"><span>388</span></span><span class="code">       ttj[2] = res.lo</span>
+<span class="number"><span>389</span></span><span class="code"></span>
+<span class="number"><span>390</span></span><span class="code">       if ((ttj[1]+ttj[2])&gt;tf)</span>
+<span class="number"><span>391</span></span><span class="code">           dts[1]=0</span>
+<span class="number"><span>392</span></span><span class="code">           dts[2]=dt</span>
+<span class="number"><span>393</span></span><span class="code">       else</span>
+<span class="number"><span>394</span></span><span class="code">           dts[1]=sdt*min(abs(dt),abs(tf-(ttj[1]+ttj[2])))</span>
+<span class="number"><span>395</span></span><span class="code">           dts[2]=dt</span>
+<span class="number"><span>396</span></span><span class="code"></span>
+<span class="number"><span>397</span></span><span class="code">           if dts[1]!=dts[2]</span>
+<span class="number"><span>398</span></span><span class="code">              hi1_=zeros(s)</span>
+<span class="number"><span>399</span></span><span class="code">              for is in 1:s</span>
+<span class="number"><span>400</span></span><span class="code">                hi1_[is]=dts[1]^(1-is)</span>
+<span class="number"><span>401</span></span><span class="code">              end</span>
+<span class="number"><span>402</span></span><span class="code">              hi1 = vload(Vec{s,floatType}, hi1_, 1)</span>
+<span class="number"><span>403</span></span><span class="code">           end</span>
+<span class="number"><span>404</span></span><span class="code">       end</span>
+<span class="number"><span>405</span></span><span class="code"></span>
+<span class="number"><span>406</span></span><span class="code">       return  (&quot;Success&quot;,j_iter)</span>
+<span class="number"><span>407</span></span><span class="code"></span>
+<span class="number"><span>408</span></span><span class="code"></span>
+<span class="number"><span>409</span></span><span class="code">  end</span>
+<span class="number"><span>410</span></span><span class="code"></span>
+<span class="number"><span>411</span></span><span class="code"></span>
+<span class="number"><span>412</span></span><span class="code"></span>
+<span class="number"><span>413</span></span><span class="code"></span>
+<span class="number"><span>414</span></span><span class="code"></span>
+<span class="number"><span>415</span></span><span class="code">function IRKGLstep_adap!(ttj,uj,ej,prob,dts,irkglcache::IRKGL_SIMD_Cache{floatType,fType,pType,s_,dim,dim_}) where {floatType,fType,pType,s_,dim,dim_}</span>
+<span class="number"><span>416</span></span><span class="code"></span>
+<span class="number"><span>417</span></span><span class="code">         f = irkglcache.odef</span>
+<span class="number"><span>418</span></span><span class="code">         p = irkglcache.p</span>
+<span class="number"><span>419</span></span><span class="code">         b = irkglcache.b</span>
+<span class="number"><span>420</span></span><span class="code">         c = irkglcache.c</span>
+<span class="number"><span>421</span></span><span class="code">         hi1 = irkglcache.hi1</span>
+<span class="number"><span>422</span></span><span class="code">         mu = irkglcache.mu</span>
+<span class="number"><span>423</span></span><span class="code">         nu = irkglcache.nu</span>
+<span class="number"><span>424</span></span><span class="code">         nu1 = irkglcache.nu1</span>
+<span class="number"><span>425</span></span><span class="code">         nu2 = irkglcache.nu2</span>
+<span class="number"><span>426</span></span><span class="code">         U = irkglcache.U</span>
+<span class="number"><span>427</span></span><span class="code">         Uz = irkglcache.Uz</span>
+<span class="number"><span>428</span></span><span class="code">         W = irkglcache.W</span>
+<span class="number"><span>429</span></span><span class="code">         Wz = irkglcache.Wz</span>
+<span class="number"><span>430</span></span><span class="code">         gamma=irkglcache.gamma</span>
+<span class="number"><span>431</span></span><span class="code">         F = irkglcache.F</span>
+<span class="number"><span>432</span></span><span class="code">         Dmin = irkglcache.Dmin</span>
+<span class="number"><span>433</span></span><span class="code">         step_number = irkglcache.step_number[]</span>
+<span class="number"><span>434</span></span><span class="code">         tau=irkglcache.tau[]</span>
+<span class="number"><span>435</span></span><span class="code">         first3iters = irkglcache.first3iters</span>
+<span class="number"><span>436</span></span><span class="code">         initial_interp = irkglcache.initial_interp[]</span>
+<span class="number"><span>437</span></span><span class="code">         len = irkglcache.length_u</span>
+<span class="number"><span>438</span></span><span class="code">         s = length(b)</span>
+<span class="number"><span>439</span></span><span class="code">         maxiters = (step_number==1 ? 10+irkglcache.maxiters : irkglcache.maxiters )</span>
+<span class="number"><span>440</span></span><span class="code">         tj = ttj[1]</span>
+<span class="number"><span>441</span></span><span class="code">         te = ttj[2]</span>
+<span class="number"><span>442</span></span><span class="code">         indices=1:len</span>
+<span class="number"><span>443</span></span><span class="code">         flzero = zero(floatType)</span>
+<span class="number"><span>444</span></span><span class="code"></span>
+<span class="number"><span>445</span></span><span class="code">         R=2^40</span>
+<span class="number"><span>446</span></span><span class="code">         Ws=zeros(len)</span>
+<span class="number"><span>447</span></span><span class="code">         hi1_=zeros(s)</span>
+<span class="number"><span>448</span></span><span class="code"></span>
+<span class="number"><span>449</span></span><span class="code">         dt=dts[1]</span>
+<span class="number"><span>450</span></span><span class="code">         dtz=dts[2]</span>
+<span class="number"><span>451</span></span><span class="code">         sdt=dts[3]</span>
+<span class="number"><span>452</span></span><span class="code">         tf=prob.tspan[2]</span>
+<span class="number"><span>453</span></span><span class="code"></span>
+<span class="number"><span>454</span></span><span class="code">#         if step_number&gt;1</span>
+<span class="number"><span>455</span></span><span class="code">#             for k in indices</span>
+<span class="number"><span>456</span></span><span class="code">#                 Wzk=getindex_(Wz,k)</span>
+<span class="number"><span>457</span></span><span class="code">#                 setindex_!(W, Wzk, k)</span>
+<span class="number"><span>458</span></span><span class="code">#             end</span>
+<span class="number"><span>459</span></span><span class="code">#         else</span>
+<span class="number"><span>460</span></span><span class="code">#             for k in indices</span>
+<span class="number"><span>461</span></span><span class="code">#                 setindex_!(W, 0., k)</span>
+<span class="number"><span>462</span></span><span class="code">#             end</span>
+<span class="number"><span>463</span></span><span class="code">#         end</span>
+<span class="number"><span>464</span></span><span class="code"></span>
+<span class="number"><span>465</span></span><span class="code">         for k in indices</span>
+<span class="number"><span>466</span></span><span class="code">             setindex_!(W, 0., k)</span>
+<span class="number"><span>467</span></span><span class="code">         end</span>
+<span class="number"><span>468</span></span><span class="code"></span>
+<span class="number"><span>469</span></span><span class="code">         cdt=c*dt</span>
+<span class="number"><span>470</span></span><span class="code">         for k in indices</span>
+<span class="number"><span>471</span></span><span class="code">            cdts=cdt</span>
+<span class="number"><span>472</span></span><span class="code">            Wk = getindex_(W,k)</span>
+<span class="number"><span>473</span></span><span class="code">            dUk = muladd(cdts,Wk[1],ej[k])</span>
+<span class="number"><span>474</span></span><span class="code">            for is in 2:s</span>
+<span class="number"><span>475</span></span><span class="code">   #            dUk=muladd((c*dt)^is,Wk[is],dUk)   # ez dabil</span>
+<span class="number"><span>476</span></span><span class="code">                cdts=cdts*cdt</span>
+<span class="number"><span>477</span></span><span class="code">                dUk=muladd(cdts,Wk[is],dUk)</span>
+<span class="number"><span>478</span></span><span class="code">            end</span>
+<span class="number"><span>479</span></span><span class="code">            Uk = uj[k]+dUk</span>
+<span class="number"><span>480</span></span><span class="code">            setindex_!(U, Uk, k)</span>
+<span class="number"><span>481</span></span><span class="code">         end</span>
+<span class="number"><span>482</span></span><span class="code"></span>
+<span class="number"><span>483</span></span><span class="code"></span>
+<span class="number"><span>484</span></span><span class="code">         j_iter = 0</span>
+<span class="number"><span>485</span></span><span class="code">         Dmin .= Inf</span>
+<span class="number"><span>486</span></span><span class="code">         iter = true # Initialize iter outside the for loop</span>
+<span class="number"><span>487</span></span><span class="code">         plusIt=true</span>
+<span class="number"><span>488</span></span><span class="code">         diffU =true</span>
+<span class="number"><span>489</span></span><span class="code"></span>
+<span class="number"><span>490</span></span><span class="code">         dtz=dt</span>
+<span class="number"><span>491</span></span><span class="code"></span>
+<span class="number"><span>492</span></span><span class="code">         @inbounds while (iter &amp;&amp; j_iter&lt;maxiters)</span>
+<span class="number"><span>493</span></span><span class="code"></span>
+<span class="number"><span>494</span></span><span class="code">#             println(&quot;iterazioa-adap ** j_iter=&quot;, j_iter, &quot;,dt=&quot;, dt, &quot;Plusit=&quot;,plusIt)</span>
+<span class="number"><span>495</span></span><span class="code"></span>
+<span class="number"><span>496</span></span><span class="code">             iter = false</span>
+<span class="number"><span>497</span></span><span class="code">             Uz.data .= U.data</span>
+<span class="number"><span>498</span></span><span class="code">             j_iter += 1</span>
+<span class="number"><span>499</span></span><span class="code"></span>
+<span class="number"><span>500</span></span><span class="code">             dtz=dt</span>
+<span class="number"><span>501</span></span><span class="code"></span>
+<span class="number"><span>502</span></span><span class="code">             f(F, U, p, tj + dt*c)</span>
+<span class="number"><span>503</span></span><span class="code"></span>
+<span class="number"><span>504</span></span><span class="code">             for is in 1:s</span>
+<span class="number"><span>505</span></span><span class="code">                 hi1_[is]=dt^(1-is)</span>
+<span class="number"><span>506</span></span><span class="code">             end</span>
+<span class="number"><span>507</span></span><span class="code">             hi1 = vload(Vec{s,floatType}, hi1_, 1)</span>
+<span class="number"><span>508</span></span><span class="code"></span>
+<span class="number"><span>509</span></span><span class="code">             for k in indices</span>
+<span class="number"><span>510</span></span><span class="code">                Fk = getindex_(F,k)</span>
+<span class="number"><span>511</span></span><span class="code">                Wk = gamma[1]*Fk[1]</span>
+<span class="number"><span>512</span></span><span class="code">                for is in 2:s</span>
+<span class="number"><span>513</span></span><span class="code">                    Wk = muladd(gamma[is], Fk[is], Wk)</span>
+<span class="number"><span>514</span></span><span class="code">                end</span>
+<span class="number"><span>515</span></span><span class="code">                hWk=hi1*Wk</span>
+<span class="number"><span>516</span></span><span class="code">                setindex_!(W,hWk, k)</span>
+<span class="number"><span>517</span></span><span class="code">             end</span>
+<span class="number"><span>518</span></span><span class="code"></span>
+<span class="number"><span>519</span></span><span class="code">             [Ws[k]=W.data[k*s] for k in 1:len]</span>
+<span class="number"><span>520</span></span><span class="code">             dt=min( Rdigits(tau/norm(Ws)^(1/s),R), abs(tf-(ttj[1]+ttj[2])))</span>
+<span class="number"><span>521</span></span><span class="code"></span>
+<span class="number"><span>522</span></span><span class="code">             diffU = false</span>
+<span class="number"><span>523</span></span><span class="code"></span>
+<span class="number"><span>524</span></span><span class="code">             cdt=c*dt</span>
+<span class="number"><span>525</span></span><span class="code">             for k in indices</span>
+<span class="number"><span>526</span></span><span class="code">                cdts=cdt</span>
+<span class="number"><span>527</span></span><span class="code">                Wk = getindex_(W,k)</span>
+<span class="number"><span>528</span></span><span class="code">                dUk = muladd(cdts,Wk[1],ej[k])</span>
+<span class="number"><span>529</span></span><span class="code">                for is in 2:s</span>
+<span class="number"><span>530</span></span><span class="code">       #            dUk=muladd((c*dt)^is,Wk[is],dUk)   # ez dabil</span>
+<span class="number"><span>531</span></span><span class="code">                    cdts=cdts*cdt</span>
+<span class="number"><span>532</span></span><span class="code">                    dUk=muladd(cdts,Wk[is],dUk)</span>
+<span class="number"><span>533</span></span><span class="code">                end</span>
+<span class="number"><span>534</span></span><span class="code">                Uk = uj[k]+dUk</span>
+<span class="number"><span>535</span></span><span class="code">                setindex_!(U, Uk, k)</span>
+<span class="number"><span>536</span></span><span class="code">                Uzk = getindex_(Uz,k)</span>
+<span class="number"><span>537</span></span><span class="code">                DY = maximum(abs(Uk-Uzk))</span>
+<span class="number"><span>538</span></span><span class="code"></span>
+<span class="number"><span>539</span></span><span class="code">                if DY&gt;0</span>
+<span class="number"><span>540</span></span><span class="code">                    diffU = true</span>
+<span class="number"><span>541</span></span><span class="code">                    if DY&lt; Dmin[k]</span>
+<span class="number"><span>542</span></span><span class="code">                       Dmin[k]=DY</span>
+<span class="number"><span>543</span></span><span class="code">                       iter=true</span>
+<span class="number"><span>544</span></span><span class="code">                    end</span>
+<span class="number"><span>545</span></span><span class="code">                end</span>
+<span class="number"><span>546</span></span><span class="code">              end</span>
+<span class="number"><span>547</span></span><span class="code"></span>
+<span class="number"><span>548</span></span><span class="code">              if (!iter &amp;&amp; diffU &amp;&amp; plusIt)</span>
+<span class="number"><span>549</span></span><span class="code">                  iter=true</span>
+<span class="number"><span>550</span></span><span class="code">                  plusIt=false</span>
+<span class="number"><span>551</span></span><span class="code">              else</span>
+<span class="number"><span>552</span></span><span class="code">                  plusIt=true</span>
+<span class="number"><span>553</span></span><span class="code">              end</span>
+<span class="number"><span>554</span></span><span class="code"></span>
+<span class="number"><span>555</span></span><span class="code">       end   # while</span>
+<span class="number"><span>556</span></span><span class="code"></span>
+<span class="number"><span>557</span></span><span class="code"></span>
+<span class="number"><span>558</span></span><span class="code"></span>
+<span class="number"><span>559</span></span><span class="code">       if (!iter &amp;&amp; j_iter==maxiters)</span>
+<span class="number"><span>560</span></span><span class="code">           println(&quot;Fail !!!  Step=&quot;,j, &quot; dt=&quot;, dts[1])</span>
+<span class="number"><span>561</span></span><span class="code">           return(&quot;Failure&quot;,0)</span>
+<span class="number"><span>562</span></span><span class="code">       end</span>
+<span class="number"><span>563</span></span><span class="code"></span>
+<span class="number"><span>564</span></span><span class="code">       @inbounds if (j_iter&lt;maxiters &amp;&amp; diffU)</span>
+<span class="number"><span>565</span></span><span class="code">          j_iter += 1</span>
+<span class="number"><span>566</span></span><span class="code">          f(F, U, p, tj + dt*c)</span>
+<span class="number"><span>567</span></span><span class="code"></span>
+<span class="number"><span>568</span></span><span class="code">          for k in indices</span>
+<span class="number"><span>569</span></span><span class="code">             Fk = getindex_(F,k)</span>
+<span class="number"><span>570</span></span><span class="code">             Wk = gamma[1]*Fk[1]</span>
+<span class="number"><span>571</span></span><span class="code">             for is in 2:s</span>
+<span class="number"><span>572</span></span><span class="code">                 Wk = muladd(gamma[is], Fk[is], Wk)</span>
+<span class="number"><span>573</span></span><span class="code">             end</span>
+<span class="number"><span>574</span></span><span class="code">             hWk=hi1*Wk</span>
+<span class="number"><span>575</span></span><span class="code">             setindex_!(W,hWk, k)</span>
+<span class="number"><span>576</span></span><span class="code">          end</span>
+<span class="number"><span>577</span></span><span class="code">       end</span>
+<span class="number"><span>578</span></span><span class="code"></span>
+<span class="number"><span>579</span></span><span class="code">        Wz.data .= W.data</span>
+<span class="number"><span>580</span></span><span class="code"></span>
+<span class="number"><span>581</span></span><span class="code">        @inbounds for k in indices    #Batura konpentsatuaren parekoa</span>
+<span class="number"><span>582</span></span><span class="code">            Wk = getindex_(W,k)</span>
+<span class="number"><span>583</span></span><span class="code">            W_sum=dt*Wk[1]</span>
+<span class="number"><span>584</span></span><span class="code">            for is in 2:s</span>
+<span class="number"><span>585</span></span><span class="code">                W_sum=muladd(dt^is,Wk[is],W_sum)</span>
+<span class="number"><span>586</span></span><span class="code">            end</span>
+<span class="number"><span>587</span></span><span class="code">            res = Base.TwicePrecision(uj[k], ej[k]) + W_sum</span>
+<span class="number"><span>588</span></span><span class="code">            uj[k] = res.hi</span>
+<span class="number"><span>589</span></span><span class="code">            ej[k] = res.lo</span>
+<span class="number"><span>590</span></span><span class="code">         end</span>
+<span class="number"><span>591</span></span><span class="code"></span>
+<span class="number"><span>592</span></span><span class="code"></span>
+<span class="number"><span>593</span></span><span class="code">         res = Base.TwicePrecision(tj, te) + dt</span>
+<span class="number"><span>594</span></span><span class="code">         ttj[1] = res.hi</span>
+<span class="number"><span>595</span></span><span class="code">         ttj[2] = res.lo</span>
+<span class="number"><span>596</span></span><span class="code"></span>
+<span class="number"><span>597</span></span><span class="code">         if ((ttj[1]+ttj[2])&gt;tf)</span>
+<span class="number"><span>598</span></span><span class="code">             dts[1]=0</span>
+<span class="number"><span>599</span></span><span class="code">             dts[2]=dt</span>
+<span class="number"><span>600</span></span><span class="code">         else</span>
+<span class="number"><span>601</span></span><span class="code">             dts[1]=sdt*min(abs(dt),abs(tf-(ttj[1]+ttj[2])))</span>
+<span class="number"><span>602</span></span><span class="code">             dts[2]=dt</span>
+<span class="number"><span>603</span></span><span class="code"></span>
+<span class="number"><span>604</span></span><span class="code">             if dts[1]!=dts[2]</span>
+<span class="number"><span>605</span></span><span class="code">                hi1_=zeros(s)</span>
+<span class="number"><span>606</span></span><span class="code">                for is in 1:s</span>
+<span class="number"><span>607</span></span><span class="code">                  hi1_[is]=dts[1]^(1-is)</span>
+<span class="number"><span>608</span></span><span class="code">                end</span>
+<span class="number"><span>609</span></span><span class="code">                hi1 = vload(Vec{s,floatType}, hi1_, 1)</span>
+<span class="number"><span>610</span></span><span class="code">             end</span>
+<span class="number"><span>611</span></span><span class="code">         end</span>
+<span class="number"><span>612</span></span><span class="code"></span>
+<span class="number"><span>613</span></span><span class="code">         return  (&quot;Success&quot;,j_iter)</span>
+<span class="number"><span>614</span></span><span class="code"></span>
+<span class="number"><span>615</span></span><span class="code"></span>
+<span class="number"><span>616</span></span><span class="code">end</span>
+<span class="number"><span>617</span></span><span class="code"></span>
+</code></pre>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>
+  setTimeout(function() {
+    $(".number").css("width", "20px");
+    $(".number span").attr("class", "ln hljs-subst");
+    resize();
+    var timer = false;
+    $(window).resize(function() {
+      if (timer !== false) {
+        clearTimeout(timer);
+      }
+      timer = setTimeout(function() {
+        resize();
+      }, 200);
+    })
+
+  }, 100);
+  function resize() {
+    $("span.code").each(function(i, c) {
+      var h = $(c).height();
+      $(c).prev().height(h);
+    });
+  }
+</script>
+</body>
+</html>

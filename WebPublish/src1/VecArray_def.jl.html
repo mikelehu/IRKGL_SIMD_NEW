@@ -1,0 +1,110 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <link rel="stylesheet" href="https://rawgithub.com/highlightjs/cdn-release/master/build/styles/github.min.css">
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/highlight.min.js"></script>
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/languages/undefined.min.js"></script>
+  <style>
+    body {
+      margin: 0px;
+      padding: 15px;
+      font-size: 12
+    }
+    .hljs {
+      margin: -15px;
+      word-wrap: break-word;
+    }
+    body, .hljs {
+      font-family: Menlo, Consolas, DejaVu Sans Mono, monospace;
+    }
+    .number {
+      float:left;
+      text-align: right;
+      display: inline-block;
+      margin-right: 5px;
+    }
+    .ln {
+      opacity: 0.5;
+    }
+    pre {
+      tab-size:      4;
+    }
+  </style>
+</head>
+<body>
+<pre><code class="jl">
+<span class="number"><span>1</span></span><span class="code"></span>
+<span class="number"><span>2</span></span><span class="code">struct VecArray{s_,T,dim}</span>
+<span class="number"><span>3</span></span><span class="code">    data::Array{T,dim}</span>
+<span class="number"><span>4</span></span><span class="code">end</span>
+<span class="number"><span>5</span></span><span class="code"></span>
+<span class="number"><span>6</span></span><span class="code">@inline function Base.getindex(v::VecArray{s,T,dim},i...) where {s,T,dim}</span>
+<span class="number"><span>7</span></span><span class="code">        Vec{s,T}(NTuple{s,T}(@inbounds v.data[k,i...] for k=1:s))</span>
+<span class="number"><span>8</span></span><span class="code">end</span>
+<span class="number"><span>9</span></span><span class="code"></span>
+<span class="number"><span>10</span></span><span class="code">@inline function Base.setindex!(v::VecArray{s,T,dim},vi::Vec{s,T},i...) where {s,T,dim}</span>
+<span class="number"><span>11</span></span><span class="code">    @inbounds for j in 1:s</span>
+<span class="number"><span>12</span></span><span class="code">        v.data[j,i...] = vi[j]</span>
+<span class="number"><span>13</span></span><span class="code">    end</span>
+<span class="number"><span>14</span></span><span class="code">    return nothing</span>
+<span class="number"><span>15</span></span><span class="code">end</span>
+<span class="number"><span>16</span></span><span class="code"></span>
+<span class="number"><span>17</span></span><span class="code">@inline function Base.setindex!(v::VecArray{s,T,dim},vi::T2,i...) where {s,T,T2,dim}</span>
+<span class="number"><span>18</span></span><span class="code">    vi_ = convert(T,vi)</span>
+<span class="number"><span>19</span></span><span class="code">    @inbounds for k in 1:s</span>
+<span class="number"><span>20</span></span><span class="code">        v.data[k,i...] = vi_</span>
+<span class="number"><span>21</span></span><span class="code">    end</span>
+<span class="number"><span>22</span></span><span class="code">    return nothing</span>
+<span class="number"><span>23</span></span><span class="code">end</span>
+<span class="number"><span>24</span></span><span class="code"></span>
+<span class="number"><span>25</span></span><span class="code">@inline function getindex_(v::VecArray{s,T,dim},i::Int64) where {s,T,dim}</span>
+<span class="number"><span>26</span></span><span class="code">      j = s*(i-1)</span>
+<span class="number"><span>27</span></span><span class="code">      Vec{s,T}(NTuple{s,T}(@inbounds v.data[k+j] for k=1:s))</span>
+<span class="number"><span>28</span></span><span class="code">end</span>
+<span class="number"><span>29</span></span><span class="code"></span>
+<span class="number"><span>30</span></span><span class="code"></span>
+<span class="number"><span>31</span></span><span class="code">@inline function setindex_!(v::VecArray{s,T,dim},vi::Vec{s,T},i::Int64) where {s,T,dim}</span>
+<span class="number"><span>32</span></span><span class="code">    j = s*(i-1)</span>
+<span class="number"><span>33</span></span><span class="code">    @inbounds for k in 1:s</span>
+<span class="number"><span>34</span></span><span class="code">        v.data[j+k] = vi[k]</span>
+<span class="number"><span>35</span></span><span class="code">    end</span>
+<span class="number"><span>36</span></span><span class="code">    return nothing</span>
+<span class="number"><span>37</span></span><span class="code">end</span>
+<span class="number"><span>38</span></span><span class="code"></span>
+<span class="number"><span>39</span></span><span class="code">@inline function setindex_!(v::VecArray{s,T,dim},vi::T2,i::Int64) where {s,T,T2,dim}</span>
+<span class="number"><span>40</span></span><span class="code">    vi_ = convert(T,vi)</span>
+<span class="number"><span>41</span></span><span class="code">    j = s*(i-1)</span>
+<span class="number"><span>42</span></span><span class="code">    @inbounds for k in 1:s</span>
+<span class="number"><span>43</span></span><span class="code">        v.data[j+k] = vi_</span>
+<span class="number"><span>44</span></span><span class="code">    end</span>
+<span class="number"><span>45</span></span><span class="code">    return nothing</span>
+<span class="number"><span>46</span></span><span class="code">end</span>
+<span class="number"><span>47</span></span><span class="code"></span>
+</code></pre>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>
+  setTimeout(function() {
+    $(".number").css("width", "20px");
+    $(".number span").attr("class", "ln hljs-subst");
+    resize();
+    var timer = false;
+    $(window).resize(function() {
+      if (timer !== false) {
+        clearTimeout(timer);
+      }
+      timer = setTimeout(function() {
+        resize();
+      }, 200);
+    })
+
+  }, 100);
+  function resize() {
+    $("span.code").each(function(i, c) {
+      var h = $(c).height();
+      $(c).prev().height(h);
+    });
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,574 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <link rel="stylesheet" href="https://rawgithub.com/highlightjs/cdn-release/master/build/styles/github.min.css">
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/highlight.min.js"></script>
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/languages/undefined.min.js"></script>
+  <style>
+    body {
+      margin: 0px;
+      padding: 15px;
+      font-size: 12
+    }
+    .hljs {
+      margin: -15px;
+      word-wrap: break-word;
+    }
+    body, .hljs {
+      font-family: Menlo, Consolas, DejaVu Sans Mono, monospace;
+    }
+    .number {
+      float:left;
+      text-align: right;
+      display: inline-block;
+      margin-right: 5px;
+    }
+    .ln {
+      opacity: 0.5;
+    }
+    pre {
+      tab-size:      4;
+    }
+  </style>
+</head>
+<body>
+<pre><code class="ipynb">
+<span class="number"><span>1</span></span><span class="code">{</span>
+<span class="number"><span>2</span></span><span class="code"> &quot;cells&quot;: [</span>
+<span class="number"><span>3</span></span><span class="code">  {</span>
+<span class="number"><span>4</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>5</span></span><span class="code">   &quot;execution_count&quot;: 1,</span>
+<span class="number"><span>6</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>7</span></span><span class="code">   &quot;outputs&quot;: [],</span>
+<span class="number"><span>8</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>9</span></span><span class="code">    &quot;using SIMD\n&quot;,</span>
+<span class="number"><span>10</span></span><span class="code">    &quot;using BenchmarkTools\n&quot;,</span>
+<span class="number"><span>11</span></span><span class="code">    &quot;using LinearAlgebra&quot;</span>
+<span class="number"><span>12</span></span><span class="code">   ]</span>
+<span class="number"><span>13</span></span><span class="code">  },</span>
+<span class="number"><span>14</span></span><span class="code">  {</span>
+<span class="number"><span>15</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>16</span></span><span class="code">   &quot;execution_count&quot;: 2,</span>
+<span class="number"><span>17</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>18</span></span><span class="code">   &quot;outputs&quot;: [],</span>
+<span class="number"><span>19</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>20</span></span><span class="code">    &quot;struct Vec8Vector{T}\n&quot;,</span>
+<span class="number"><span>21</span></span><span class="code">    &quot;    data::Array{T,2}\n&quot;,</span>
+<span class="number"><span>22</span></span><span class="code">    &quot;end\n&quot;,</span>
+<span class="number"><span>23</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>24</span></span><span class="code">    &quot;function Base.getindex(v::Vec8Vector{T},i::Int64) where {T}\n&quot;,</span>
+<span class="number"><span>25</span></span><span class="code">    &quot; #   @inbounds vec = Vec((v.data[1,i], v.data[2,i], v.data[3,i], v.data[4,i],v.data[5,i], v.data[6,i], v.data[7,i], v.data[8,i]))\n&quot;,</span>
+<span class="number"><span>26</span></span><span class="code">    &quot;    Vec{8,T}( NTuple{8,T}(v.data[k,i]  for k=1:8))\n&quot;,</span>
+<span class="number"><span>27</span></span><span class="code">    &quot; #   return vec\n&quot;,</span>
+<span class="number"><span>28</span></span><span class="code">    &quot;end\n&quot;,</span>
+<span class="number"><span>29</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>30</span></span><span class="code">    &quot;function Base.setindex!(v::Vec8Vector{T},vi::Vec{8,T},i::Int64) where {T}\n&quot;,</span>
+<span class="number"><span>31</span></span><span class="code">    &quot;    @inbounds for j in 1:8\n&quot;,</span>
+<span class="number"><span>32</span></span><span class="code">    &quot;        v.data[j,i] = vi[j]\n&quot;,</span>
+<span class="number"><span>33</span></span><span class="code">    &quot;    end\n&quot;,</span>
+<span class="number"><span>34</span></span><span class="code">    &quot;    return nothing\n&quot;,</span>
+<span class="number"><span>35</span></span><span class="code">    &quot;end&quot;</span>
+<span class="number"><span>36</span></span><span class="code">   ]</span>
+<span class="number"><span>37</span></span><span class="code">  },</span>
+<span class="number"><span>38</span></span><span class="code">  {</span>
+<span class="number"><span>39</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>40</span></span><span class="code">   &quot;execution_count&quot;: 5,</span>
+<span class="number"><span>41</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>42</span></span><span class="code">   &quot;outputs&quot;: [</span>
+<span class="number"><span>43</span></span><span class="code">    {</span>
+<span class="number"><span>44</span></span><span class="code">     &quot;data&quot;: {</span>
+<span class="number"><span>45</span></span><span class="code">      &quot;text/plain&quot;: [</span>
+<span class="number"><span>46</span></span><span class="code">       &quot;-1&quot;</span>
+<span class="number"><span>47</span></span><span class="code">      ]</span>
+<span class="number"><span>48</span></span><span class="code">     },</span>
+<span class="number"><span>49</span></span><span class="code">     &quot;execution_count&quot;: 5,</span>
+<span class="number"><span>50</span></span><span class="code">     &quot;metadata&quot;: {},</span>
+<span class="number"><span>51</span></span><span class="code">     &quot;output_type&quot;: &quot;execute_result&quot;</span>
+<span class="number"><span>52</span></span><span class="code">    }</span>
+<span class="number"><span>53</span></span><span class="code">   ],</span>
+<span class="number"><span>54</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>55</span></span><span class="code">    &quot;a = rand(8,6)\n&quot;,</span>
+<span class="number"><span>56</span></span><span class="code">    &quot;v2=Vec8Vector(a);\n&quot;,</span>
+<span class="number"><span>57</span></span><span class="code">    &quot;a[1,1]=pi\n&quot;,</span>
+<span class="number"><span>58</span></span><span class="code">    &quot;a[2,1]=pi/2\n&quot;,</span>
+<span class="number"><span>59</span></span><span class="code">    &quot;a[1,2]=0\n&quot;,</span>
+<span class="number"><span>60</span></span><span class="code">    &quot;a[2,2]=-1\n&quot;,</span>
+<span class="number"><span>61</span></span><span class="code">    &quot;#v[1]+1&quot;</span>
+<span class="number"><span>62</span></span><span class="code">   ]</span>
+<span class="number"><span>63</span></span><span class="code">  },</span>
+<span class="number"><span>64</span></span><span class="code">  {</span>
+<span class="number"><span>65</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>66</span></span><span class="code">   &quot;execution_count&quot;: 4,</span>
+<span class="number"><span>67</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>68</span></span><span class="code">   &quot;outputs&quot;: [</span>
+<span class="number"><span>69</span></span><span class="code">    {</span>
+<span class="number"><span>70</span></span><span class="code">     &quot;data&quot;: {</span>
+<span class="number"><span>71</span></span><span class="code">      &quot;text/plain&quot;: [</span>
+<span class="number"><span>72</span></span><span class="code">       &quot;&lt;8 x Float64&gt;[0.8319689472936884, 0.9896510450533695, 1.2385291728134555, 0.9230241459356745, 0.9667935630260385, 0.8495099978950313, 0.6363119782842566, 0.7689898993707098]&quot;</span>
+<span class="number"><span>73</span></span><span class="code">      ]</span>
+<span class="number"><span>74</span></span><span class="code">     },</span>
+<span class="number"><span>75</span></span><span class="code">     &quot;execution_count&quot;: 4,</span>
+<span class="number"><span>76</span></span><span class="code">     &quot;metadata&quot;: {},</span>
+<span class="number"><span>77</span></span><span class="code">     &quot;output_type&quot;: &quot;execute_result&quot;</span>
+<span class="number"><span>78</span></span><span class="code">    }</span>
+<span class="number"><span>79</span></span><span class="code">   ],</span>
+<span class="number"><span>80</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>81</span></span><span class="code">    &quot;a = rand(8,6)\n&quot;,</span>
+<span class="number"><span>82</span></span><span class="code">    &quot;v = Vec8Vector(a)\n&quot;,</span>
+<span class="number"><span>83</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>84</span></span><span class="code">    &quot;v[6] = v[1]*v[2] + v[3]*v[4] + sin(v[5])&quot;</span>
+<span class="number"><span>85</span></span><span class="code">   ]</span>
+<span class="number"><span>86</span></span><span class="code">  },</span>
+<span class="number"><span>87</span></span><span class="code">  {</span>
+<span class="number"><span>88</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>89</span></span><span class="code">   &quot;execution_count&quot;: 5,</span>
+<span class="number"><span>90</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>91</span></span><span class="code">   &quot;outputs&quot;: [</span>
+<span class="number"><span>92</span></span><span class="code">    {</span>
+<span class="number"><span>93</span></span><span class="code">     &quot;data&quot;: {</span>
+<span class="number"><span>94</span></span><span class="code">      &quot;text/plain&quot;: [</span>
+<span class="number"><span>95</span></span><span class="code">       &quot;&lt;8 x Float64&gt;[0.7392587346642323, 0.8358344596621353, 0.9453052573940411, 0.7974300677401995, 0.8230688787067645, 0.7509569218305208, 0.594233240121537, 0.6954097215970189]&quot;</span>
+<span class="number"><span>96</span></span><span class="code">      ]</span>
+<span class="number"><span>97</span></span><span class="code">     },</span>
+<span class="number"><span>98</span></span><span class="code">     &quot;execution_count&quot;: 5,</span>
+<span class="number"><span>99</span></span><span class="code">     &quot;metadata&quot;: {},</span>
+<span class="number"><span>100</span></span><span class="code">     &quot;output_type&quot;: &quot;execute_result&quot;</span>
+<span class="number"><span>101</span></span><span class="code">    }</span>
+<span class="number"><span>102</span></span><span class="code">   ],</span>
+<span class="number"><span>103</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>104</span></span><span class="code">    &quot;v[1] = sin(v[6])&quot;</span>
+<span class="number"><span>105</span></span><span class="code">   ]</span>
+<span class="number"><span>106</span></span><span class="code">  },</span>
+<span class="number"><span>107</span></span><span class="code">  {</span>
+<span class="number"><span>108</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>109</span></span><span class="code">   &quot;execution_count&quot;: 6,</span>
+<span class="number"><span>110</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>111</span></span><span class="code">   &quot;outputs&quot;: [</span>
+<span class="number"><span>112</span></span><span class="code">    {</span>
+<span class="number"><span>113</span></span><span class="code">     &quot;data&quot;: {</span>
+<span class="number"><span>114</span></span><span class="code">      &quot;text/plain&quot;: [</span>
+<span class="number"><span>115</span></span><span class="code">       &quot;gradV! (generic function with 1 method)&quot;</span>
+<span class="number"><span>116</span></span><span class="code">      ]</span>
+<span class="number"><span>117</span></span><span class="code">     },</span>
+<span class="number"><span>118</span></span><span class="code">     &quot;execution_count&quot;: 6,</span>
+<span class="number"><span>119</span></span><span class="code">     &quot;metadata&quot;: {},</span>
+<span class="number"><span>120</span></span><span class="code">     &quot;output_type&quot;: &quot;execute_result&quot;</span>
+<span class="number"><span>121</span></span><span class="code">    }</span>
+<span class="number"><span>122</span></span><span class="code">   ],</span>
+<span class="number"><span>123</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>124</span></span><span class="code">    &quot;function gradV!(grad,q)\n&quot;,</span>
+<span class="number"><span>125</span></span><span class="code">    &quot;#   C = μ * J_2 * R_e^2   \n&quot;,</span>
+<span class="number"><span>126</span></span><span class="code">    &quot;    C = 1.7554962315534863e10\n&quot;,</span>
+<span class="number"><span>127</span></span><span class="code">    &quot;    x = q[1]\n&quot;,</span>
+<span class="number"><span>128</span></span><span class="code">    &quot;    y = q[2]\n&quot;,</span>
+<span class="number"><span>129</span></span><span class="code">    &quot;    z = q[3]\n&quot;,</span>
+<span class="number"><span>130</span></span><span class="code">    &quot;    r2 = x^2 + y^2 + z^2\n&quot;,</span>
+<span class="number"><span>131</span></span><span class="code">    &quot;    r = sqrt(r2)\n&quot;,</span>
+<span class="number"><span>132</span></span><span class="code">    &quot;    sinth = z/r\n&quot;,</span>
+<span class="number"><span>133</span></span><span class="code">    &quot;    aux1 = 1.5*C/(r*r2^2)\n&quot;,</span>
+<span class="number"><span>134</span></span><span class="code">    &quot;    aux2 = 5*sinth^2\n&quot;,</span>
+<span class="number"><span>135</span></span><span class="code">    &quot;    aux3 = aux1*(1 - aux2)\n&quot;,</span>
+<span class="number"><span>136</span></span><span class="code">    &quot;    grad[1] = aux3*x\n&quot;,</span>
+<span class="number"><span>137</span></span><span class="code">    &quot;    grad[2] = aux3*y\n&quot;,</span>
+<span class="number"><span>138</span></span><span class="code">    &quot;    grad[3] = aux1*(3-aux2)*z\n&quot;,</span>
+<span class="number"><span>139</span></span><span class="code">    &quot;    return nothing\n&quot;,</span>
+<span class="number"><span>140</span></span><span class="code">    &quot;end&quot;</span>
+<span class="number"><span>141</span></span><span class="code">   ]</span>
+<span class="number"><span>142</span></span><span class="code">  },</span>
+<span class="number"><span>143</span></span><span class="code">  {</span>
+<span class="number"><span>144</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>145</span></span><span class="code">   &quot;execution_count&quot;: 7,</span>
+<span class="number"><span>146</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>147</span></span><span class="code">   &quot;outputs&quot;: [</span>
+<span class="number"><span>148</span></span><span class="code">    {</span>
+<span class="number"><span>149</span></span><span class="code">     &quot;name&quot;: &quot;stdout&quot;,</span>
+<span class="number"><span>150</span></span><span class="code">     &quot;output_type&quot;: &quot;stream&quot;,</span>
+<span class="number"><span>151</span></span><span class="code">     &quot;text&quot;: [</span>
+<span class="number"><span>152</span></span><span class="code">      &quot;  19.072 ns (0 allocations: 0 bytes)\n&quot;,</span>
+<span class="number"><span>153</span></span><span class="code">      &quot;  10.859 ns (0 allocations: 0 bytes)\n&quot;</span>
+<span class="number"><span>154</span></span><span class="code">     ]</span>
+<span class="number"><span>155</span></span><span class="code">    },</span>
+<span class="number"><span>156</span></span><span class="code">    {</span>
+<span class="number"><span>157</span></span><span class="code">     &quot;data&quot;: {</span>
+<span class="number"><span>158</span></span><span class="code">      &quot;text/plain&quot;: [</span>
+<span class="number"><span>159</span></span><span class="code">       &quot;0.0&quot;</span>
+<span class="number"><span>160</span></span><span class="code">      ]</span>
+<span class="number"><span>161</span></span><span class="code">     },</span>
+<span class="number"><span>162</span></span><span class="code">     &quot;execution_count&quot;: 7,</span>
+<span class="number"><span>163</span></span><span class="code">     &quot;metadata&quot;: {},</span>
+<span class="number"><span>164</span></span><span class="code">     &quot;output_type&quot;: &quot;execute_result&quot;</span>
+<span class="number"><span>165</span></span><span class="code">    }</span>
+<span class="number"><span>166</span></span><span class="code">   ],</span>
+<span class="number"><span>167</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>168</span></span><span class="code">    &quot;qq = rand(8,3)\n&quot;,</span>
+<span class="number"><span>169</span></span><span class="code">    &quot;Q = Vec8Vector(qq)\n&quot;,</span>
+<span class="number"><span>170</span></span><span class="code">    &quot;Grad = deepcopy(Q)\n&quot;,</span>
+<span class="number"><span>171</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>172</span></span><span class="code">    &quot;@btime gradV!(Grad,Q)\n&quot;,</span>
+<span class="number"><span>173</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>174</span></span><span class="code">    &quot;q = qq[1,:]\n&quot;,</span>
+<span class="number"><span>175</span></span><span class="code">    &quot;grad = similar(q)\n&quot;,</span>
+<span class="number"><span>176</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>177</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>178</span></span><span class="code">    &quot;@btime gradV!(grad,q)\n&quot;,</span>
+<span class="number"><span>179</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>180</span></span><span class="code">    &quot;dif = Float64[]\n&quot;,</span>
+<span class="number"><span>181</span></span><span class="code">    &quot;for i in 1:8\n&quot;,</span>
+<span class="number"><span>182</span></span><span class="code">    &quot;    gradV!(grad,qq[i,:])\n&quot;,</span>
+<span class="number"><span>183</span></span><span class="code">    &quot;    push!(dif, norm(grad-Grad.data[i,:])) \n&quot;,</span>
+<span class="number"><span>184</span></span><span class="code">    &quot;end\n&quot;,</span>
+<span class="number"><span>185</span></span><span class="code">    &quot;norm(dif)&quot;</span>
+<span class="number"><span>186</span></span><span class="code">   ]</span>
+<span class="number"><span>187</span></span><span class="code">  },</span>
+<span class="number"><span>188</span></span><span class="code">  {</span>
+<span class="number"><span>189</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>190</span></span><span class="code">   &quot;execution_count&quot;: 8,</span>
+<span class="number"><span>191</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>192</span></span><span class="code">   &quot;outputs&quot;: [],</span>
+<span class="number"><span>193</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>194</span></span><span class="code">    &quot;struct Vec8Array{T,dim}\n&quot;,</span>
+<span class="number"><span>195</span></span><span class="code">    &quot;    data::Array{T,dim}\n&quot;,</span>
+<span class="number"><span>196</span></span><span class="code">    &quot;end\n&quot;,</span>
+<span class="number"><span>197</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>198</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>199</span></span><span class="code">    &quot;function Base.getindex(v::Vec8Array{T,dim},i...) where {T,dim}\n&quot;,</span>
+<span class="number"><span>200</span></span><span class="code">    &quot;#    @inbounds vec = Vec((v.data[1,i...], v.data[2,i...], v.data[3,i...], v.data[4,i...],v.data[5,i...], v.data[6,i...], v.data[7,i...], v.data[8,i...]))\n&quot;,</span>
+<span class="number"><span>201</span></span><span class="code">    &quot;#    return vec\n&quot;,</span>
+<span class="number"><span>202</span></span><span class="code">    &quot;      Vec{8,T}( NTuple{8,T}(v.data[k,i...]  for k=1:8))\n&quot;,</span>
+<span class="number"><span>203</span></span><span class="code">    &quot;end\n&quot;,</span>
+<span class="number"><span>204</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>205</span></span><span class="code">    &quot;function Base.setindex!(v::Vec8Array{T,dim},vi::Vec{8,T},i...) where {T,dim}\n&quot;,</span>
+<span class="number"><span>206</span></span><span class="code">    &quot;    @inbounds for k in 1:8\n&quot;,</span>
+<span class="number"><span>207</span></span><span class="code">    &quot;        v.data[k,i...] = vi[k]\n&quot;,</span>
+<span class="number"><span>208</span></span><span class="code">    &quot;    end\n&quot;,</span>
+<span class="number"><span>209</span></span><span class="code">    &quot;    return nothing\n&quot;,</span>
+<span class="number"><span>210</span></span><span class="code">    &quot;end\n&quot;,</span>
+<span class="number"><span>211</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>212</span></span><span class="code">    &quot;function Base.setindex!(v::Vec8Array{T,dim},vi::T2,i...) where {T,T2,dim}\n&quot;,</span>
+<span class="number"><span>213</span></span><span class="code">    &quot;    @inbounds for k in 1:8\n&quot;,</span>
+<span class="number"><span>214</span></span><span class="code">    &quot;        v.data[k,i...] = vi\n&quot;,</span>
+<span class="number"><span>215</span></span><span class="code">    &quot;    end\n&quot;,</span>
+<span class="number"><span>216</span></span><span class="code">    &quot;    return nothing\n&quot;,</span>
+<span class="number"><span>217</span></span><span class="code">    &quot;end&quot;</span>
+<span class="number"><span>218</span></span><span class="code">   ]</span>
+<span class="number"><span>219</span></span><span class="code">  },</span>
+<span class="number"><span>220</span></span><span class="code">  {</span>
+<span class="number"><span>221</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>222</span></span><span class="code">   &quot;execution_count&quot;: 9,</span>
+<span class="number"><span>223</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>224</span></span><span class="code">   &quot;outputs&quot;: [],</span>
+<span class="number"><span>225</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>226</span></span><span class="code">    &quot;struct Vec8Array{T,dim}\n&quot;,</span>
+<span class="number"><span>227</span></span><span class="code">    &quot;    data::Array{T,dim}\n&quot;,</span>
+<span class="number"><span>228</span></span><span class="code">    &quot;end\n&quot;,</span>
+<span class="number"><span>229</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>230</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>231</span></span><span class="code">    &quot;function Base.getindex(v::Vec8Array{T,dim},i...) where {T,dim}\n&quot;,</span>
+<span class="number"><span>232</span></span><span class="code">    &quot;    vec = Vec((v.data[1,i...], v.data[2,i...], v.data[3,i...], v.data[4,i...],v.data[5,i...], v.data[6,i...], v.data[7,i...], v.data[8,i...]))\n&quot;,</span>
+<span class="number"><span>233</span></span><span class="code">    &quot;    return vec\n&quot;,</span>
+<span class="number"><span>234</span></span><span class="code">    &quot;end\n&quot;,</span>
+<span class="number"><span>235</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>236</span></span><span class="code">    &quot;function Base.setindex!(v::Vec8Array{T,dim},vi::Vec{8,T},i...) where {T,dim}\n&quot;,</span>
+<span class="number"><span>237</span></span><span class="code">    &quot;    for k in 1:8\n&quot;,</span>
+<span class="number"><span>238</span></span><span class="code">    &quot;        v.data[k,i...] = vi[k]\n&quot;,</span>
+<span class="number"><span>239</span></span><span class="code">    &quot;    end\n&quot;,</span>
+<span class="number"><span>240</span></span><span class="code">    &quot;    return nothing\n&quot;,</span>
+<span class="number"><span>241</span></span><span class="code">    &quot;end\n&quot;,</span>
+<span class="number"><span>242</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>243</span></span><span class="code">    &quot;function Base.setindex!(v::Vec8Array{T,dim},vi::T2,i...) where {T,T2,dim}\n&quot;,</span>
+<span class="number"><span>244</span></span><span class="code">    &quot;    for k in 1:8\n&quot;,</span>
+<span class="number"><span>245</span></span><span class="code">    &quot;        v.data[k,i...] = vi\n&quot;,</span>
+<span class="number"><span>246</span></span><span class="code">    &quot;    end\n&quot;,</span>
+<span class="number"><span>247</span></span><span class="code">    &quot;    return nothing\n&quot;,</span>
+<span class="number"><span>248</span></span><span class="code">    &quot;end&quot;</span>
+<span class="number"><span>249</span></span><span class="code">   ]</span>
+<span class="number"><span>250</span></span><span class="code">  },</span>
+<span class="number"><span>251</span></span><span class="code">  {</span>
+<span class="number"><span>252</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>253</span></span><span class="code">   &quot;execution_count&quot;: 10,</span>
+<span class="number"><span>254</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>255</span></span><span class="code">   &quot;outputs&quot;: [</span>
+<span class="number"><span>256</span></span><span class="code">    {</span>
+<span class="number"><span>257</span></span><span class="code">     &quot;data&quot;: {</span>
+<span class="number"><span>258</span></span><span class="code">      &quot;text/plain&quot;: [</span>
+<span class="number"><span>259</span></span><span class="code">       &quot;&lt;8 x Float64&gt;[0.005839859299699747, 0.2508187724077034, 0.3623928377751766, 0.2820134029635282, 0.07144210792654396, 0.6572288527934108, 0.21831048519304727, 0.07900486583423469]&quot;</span>
+<span class="number"><span>260</span></span><span class="code">      ]</span>
+<span class="number"><span>261</span></span><span class="code">     },</span>
+<span class="number"><span>262</span></span><span class="code">     &quot;execution_count&quot;: 10,</span>
+<span class="number"><span>263</span></span><span class="code">     &quot;metadata&quot;: {},</span>
+<span class="number"><span>264</span></span><span class="code">     &quot;output_type&quot;: &quot;execute_result&quot;</span>
+<span class="number"><span>265</span></span><span class="code">    }</span>
+<span class="number"><span>266</span></span><span class="code">   ],</span>
+<span class="number"><span>267</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>268</span></span><span class="code">    &quot;a = Vec8Array(rand(8,5,4,5,6))\n&quot;,</span>
+<span class="number"><span>269</span></span><span class="code">    &quot;a[1,2,3,1]*a[2,3,4,1]&quot;</span>
+<span class="number"><span>270</span></span><span class="code">   ]</span>
+<span class="number"><span>271</span></span><span class="code">  },</span>
+<span class="number"><span>272</span></span><span class="code">  {</span>
+<span class="number"><span>273</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>274</span></span><span class="code">   &quot;execution_count&quot;: 11,</span>
+<span class="number"><span>275</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>276</span></span><span class="code">   &quot;outputs&quot;: [</span>
+<span class="number"><span>277</span></span><span class="code">    {</span>
+<span class="number"><span>278</span></span><span class="code">     &quot;data&quot;: {</span>
+<span class="number"><span>279</span></span><span class="code">      &quot;text/plain&quot;: [</span>
+<span class="number"><span>280</span></span><span class="code">       &quot;&lt;8 x Float64&gt;[0.005839859299699747, 0.2508187724077034, 0.3623928377751766, 0.2820134029635282, 0.07144210792654396, 0.6572288527934108, 0.21831048519304727, 0.07900486583423469]&quot;</span>
+<span class="number"><span>281</span></span><span class="code">      ]</span>
+<span class="number"><span>282</span></span><span class="code">     },</span>
+<span class="number"><span>283</span></span><span class="code">     &quot;execution_count&quot;: 11,</span>
+<span class="number"><span>284</span></span><span class="code">     &quot;metadata&quot;: {},</span>
+<span class="number"><span>285</span></span><span class="code">     &quot;output_type&quot;: &quot;execute_result&quot;</span>
+<span class="number"><span>286</span></span><span class="code">    }</span>
+<span class="number"><span>287</span></span><span class="code">   ],</span>
+<span class="number"><span>288</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>289</span></span><span class="code">    &quot;a[1,3,4,1] = a[1,2,3,1]*a[2,3,4,1]&quot;</span>
+<span class="number"><span>290</span></span><span class="code">   ]</span>
+<span class="number"><span>291</span></span><span class="code">  },</span>
+<span class="number"><span>292</span></span><span class="code">  {</span>
+<span class="number"><span>293</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>294</span></span><span class="code">   &quot;execution_count&quot;: 12,</span>
+<span class="number"><span>295</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>296</span></span><span class="code">   &quot;outputs&quot;: [</span>
+<span class="number"><span>297</span></span><span class="code">    {</span>
+<span class="number"><span>298</span></span><span class="code">     &quot;data&quot;: {</span>
+<span class="number"><span>299</span></span><span class="code">      &quot;text/plain&quot;: [</span>
+<span class="number"><span>300</span></span><span class="code">       &quot;&lt;8 x Float64&gt;[0.005839859299699747, 0.2508187724077034, 0.3623928377751766, 0.2820134029635282, 0.07144210792654396, 0.6572288527934108, 0.21831048519304727, 0.07900486583423469]&quot;</span>
+<span class="number"><span>301</span></span><span class="code">      ]</span>
+<span class="number"><span>302</span></span><span class="code">     },</span>
+<span class="number"><span>303</span></span><span class="code">     &quot;execution_count&quot;: 12,</span>
+<span class="number"><span>304</span></span><span class="code">     &quot;metadata&quot;: {},</span>
+<span class="number"><span>305</span></span><span class="code">     &quot;output_type&quot;: &quot;execute_result&quot;</span>
+<span class="number"><span>306</span></span><span class="code">    }</span>
+<span class="number"><span>307</span></span><span class="code">   ],</span>
+<span class="number"><span>308</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>309</span></span><span class="code">    &quot;a[1,3,4,1] &quot;</span>
+<span class="number"><span>310</span></span><span class="code">   ]</span>
+<span class="number"><span>311</span></span><span class="code">  },</span>
+<span class="number"><span>312</span></span><span class="code">  {</span>
+<span class="number"><span>313</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>314</span></span><span class="code">   &quot;execution_count&quot;: 13,</span>
+<span class="number"><span>315</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>316</span></span><span class="code">   &quot;outputs&quot;: [</span>
+<span class="number"><span>317</span></span><span class="code">    {</span>
+<span class="number"><span>318</span></span><span class="code">     &quot;name&quot;: &quot;stdout&quot;,</span>
+<span class="number"><span>319</span></span><span class="code">     &quot;output_type&quot;: &quot;stream&quot;,</span>
+<span class="number"><span>320</span></span><span class="code">     &quot;text&quot;: [</span>
+<span class="number"><span>321</span></span><span class="code">      &quot;  20.848 ns (0 allocations: 0 bytes)\n&quot;,</span>
+<span class="number"><span>322</span></span><span class="code">      &quot;  10.729 ns (0 allocations: 0 bytes)\n&quot;</span>
+<span class="number"><span>323</span></span><span class="code">     ]</span>
+<span class="number"><span>324</span></span><span class="code">    },</span>
+<span class="number"><span>325</span></span><span class="code">    {</span>
+<span class="number"><span>326</span></span><span class="code">     &quot;data&quot;: {</span>
+<span class="number"><span>327</span></span><span class="code">      &quot;text/plain&quot;: [</span>
+<span class="number"><span>328</span></span><span class="code">       &quot;0.0&quot;</span>
+<span class="number"><span>329</span></span><span class="code">      ]</span>
+<span class="number"><span>330</span></span><span class="code">     },</span>
+<span class="number"><span>331</span></span><span class="code">     &quot;execution_count&quot;: 13,</span>
+<span class="number"><span>332</span></span><span class="code">     &quot;metadata&quot;: {},</span>
+<span class="number"><span>333</span></span><span class="code">     &quot;output_type&quot;: &quot;execute_result&quot;</span>
+<span class="number"><span>334</span></span><span class="code">    }</span>
+<span class="number"><span>335</span></span><span class="code">   ],</span>
+<span class="number"><span>336</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>337</span></span><span class="code">    &quot;qq = rand(8,3)\n&quot;,</span>
+<span class="number"><span>338</span></span><span class="code">    &quot;Q = Vec8Array(qq)\n&quot;,</span>
+<span class="number"><span>339</span></span><span class="code">    &quot;Grad = deepcopy(Q)\n&quot;,</span>
+<span class="number"><span>340</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>341</span></span><span class="code">    &quot;@btime gradV!(Grad,Q)\n&quot;,</span>
+<span class="number"><span>342</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>343</span></span><span class="code">    &quot;q = qq[1,:]\n&quot;,</span>
+<span class="number"><span>344</span></span><span class="code">    &quot;grad = similar(q)\n&quot;,</span>
+<span class="number"><span>345</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>346</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>347</span></span><span class="code">    &quot;@btime gradV!(grad,q)\n&quot;,</span>
+<span class="number"><span>348</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>349</span></span><span class="code">    &quot;dif = Float64[]\n&quot;,</span>
+<span class="number"><span>350</span></span><span class="code">    &quot;for i in 1:8\n&quot;,</span>
+<span class="number"><span>351</span></span><span class="code">    &quot;    gradV!(grad,qq[i,:])\n&quot;,</span>
+<span class="number"><span>352</span></span><span class="code">    &quot;    push!(dif, norm(grad-Grad.data[i,:])) \n&quot;,</span>
+<span class="number"><span>353</span></span><span class="code">    &quot;end\n&quot;,</span>
+<span class="number"><span>354</span></span><span class="code">    &quot;norm(dif)&quot;</span>
+<span class="number"><span>355</span></span><span class="code">   ]</span>
+<span class="number"><span>356</span></span><span class="code">  },</span>
+<span class="number"><span>357</span></span><span class="code">  {</span>
+<span class="number"><span>358</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>359</span></span><span class="code">   &quot;execution_count&quot;: 14,</span>
+<span class="number"><span>360</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>361</span></span><span class="code">   &quot;outputs&quot;: [</span>
+<span class="number"><span>362</span></span><span class="code">    {</span>
+<span class="number"><span>363</span></span><span class="code">     &quot;data&quot;: {</span>
+<span class="number"><span>364</span></span><span class="code">      &quot;text/plain&quot;: [</span>
+<span class="number"><span>365</span></span><span class="code">       &quot;NbodyODE! (generic function with 1 method)&quot;</span>
+<span class="number"><span>366</span></span><span class="code">      ]</span>
+<span class="number"><span>367</span></span><span class="code">     },</span>
+<span class="number"><span>368</span></span><span class="code">     &quot;execution_count&quot;: 14,</span>
+<span class="number"><span>369</span></span><span class="code">     &quot;metadata&quot;: {},</span>
+<span class="number"><span>370</span></span><span class="code">     &quot;output_type&quot;: &quot;execute_result&quot;</span>
+<span class="number"><span>371</span></span><span class="code">    }</span>
+<span class="number"><span>372</span></span><span class="code">   ],</span>
+<span class="number"><span>373</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>374</span></span><span class="code">    &quot;function NbodyODE!(du,u,Gm,t)\n&quot;,</span>
+<span class="number"><span>375</span></span><span class="code">    &quot;     N = length(Gm)\n&quot;,</span>
+<span class="number"><span>376</span></span><span class="code">    &quot;     for k in 1:3\n&quot;,</span>
+<span class="number"><span>377</span></span><span class="code">    &quot;        for i in 1:N\n&quot;,</span>
+<span class="number"><span>378</span></span><span class="code">    &quot;            du[k,i,1] = 0\n&quot;,</span>
+<span class="number"><span>379</span></span><span class="code">    &quot;        end\n&quot;,</span>
+<span class="number"><span>380</span></span><span class="code">    &quot;     end\n&quot;,</span>
+<span class="number"><span>381</span></span><span class="code">    &quot;     @inbounds for i in 1:N\n&quot;,</span>
+<span class="number"><span>382</span></span><span class="code">    &quot;        xi = u[1,i,1]\n&quot;,</span>
+<span class="number"><span>383</span></span><span class="code">    &quot;        yi = u[2,i,1]\n&quot;,</span>
+<span class="number"><span>384</span></span><span class="code">    &quot;        zi = u[3,i,1]\n&quot;,</span>
+<span class="number"><span>385</span></span><span class="code">    &quot;        Gmi = Gm[i] \n&quot;,</span>
+<span class="number"><span>386</span></span><span class="code">    &quot;        for j in i+1:N\n&quot;,</span>
+<span class="number"><span>387</span></span><span class="code">    &quot;            xij = xi - u[1,j,1]\n&quot;,</span>
+<span class="number"><span>388</span></span><span class="code">    &quot;            yij = yi - u[2,j,1]\n&quot;,</span>
+<span class="number"><span>389</span></span><span class="code">    &quot;            zij = zi - u[3,j,1] \n&quot;,</span>
+<span class="number"><span>390</span></span><span class="code">    &quot;            Gmj = Gm[j] \n&quot;,</span>
+<span class="number"><span>391</span></span><span class="code">    &quot;            dotij = (xij*xij+yij*yij+zij*zij)\n&quot;,</span>
+<span class="number"><span>392</span></span><span class="code">    &quot;            auxij = 1/(sqrt(dotij)*dotij) \n&quot;,</span>
+<span class="number"><span>393</span></span><span class="code">    &quot;            Gmjauxij = Gmj*auxij\n&quot;,</span>
+<span class="number"><span>394</span></span><span class="code">    &quot;            du[1,i,2] -= Gmjauxij*xij\n&quot;,</span>
+<span class="number"><span>395</span></span><span class="code">    &quot;            du[2,i,2] -= Gmjauxij*yij\n&quot;,</span>
+<span class="number"><span>396</span></span><span class="code">    &quot;            du[3,i,2] -= Gmjauxij*zij  \n&quot;,</span>
+<span class="number"><span>397</span></span><span class="code">    &quot;            Gmiauxij = Gmi*auxij\n&quot;,</span>
+<span class="number"><span>398</span></span><span class="code">    &quot;            du[1,j,2] += Gmiauxij*xij\n&quot;,</span>
+<span class="number"><span>399</span></span><span class="code">    &quot;            du[2,j,2] += Gmiauxij*yij\n&quot;,</span>
+<span class="number"><span>400</span></span><span class="code">    &quot;            du[3,j,2] += Gmiauxij*zij\n&quot;,</span>
+<span class="number"><span>401</span></span><span class="code">    &quot;        end\n&quot;,</span>
+<span class="number"><span>402</span></span><span class="code">    &quot;     end \n&quot;,</span>
+<span class="number"><span>403</span></span><span class="code">    &quot;     @inbounds for i in 1:3, j in 1:N\n&quot;,</span>
+<span class="number"><span>404</span></span><span class="code">    &quot;        du[i,j,1] = u[i,j,2]\n&quot;,</span>
+<span class="number"><span>405</span></span><span class="code">    &quot;     end\n&quot;,</span>
+<span class="number"><span>406</span></span><span class="code">    &quot;    return nothing\n&quot;,</span>
+<span class="number"><span>407</span></span><span class="code">    &quot;end\n&quot;</span>
+<span class="number"><span>408</span></span><span class="code">   ]</span>
+<span class="number"><span>409</span></span><span class="code">  },</span>
+<span class="number"><span>410</span></span><span class="code">  {</span>
+<span class="number"><span>411</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>412</span></span><span class="code">   &quot;execution_count&quot;: 15,</span>
+<span class="number"><span>413</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>414</span></span><span class="code">   &quot;outputs&quot;: [</span>
+<span class="number"><span>415</span></span><span class="code">    {</span>
+<span class="number"><span>416</span></span><span class="code">     &quot;name&quot;: &quot;stdout&quot;,</span>
+<span class="number"><span>417</span></span><span class="code">     &quot;output_type&quot;: &quot;stream&quot;,</span>
+<span class="number"><span>418</span></span><span class="code">     &quot;text&quot;: [</span>
+<span class="number"><span>419</span></span><span class="code">      &quot;  466.015 ns (0 allocations: 0 bytes)\n&quot;,</span>
+<span class="number"><span>420</span></span><span class="code">      &quot;  2.110 μs (0 allocations: 0 bytes)\n&quot;</span>
+<span class="number"><span>421</span></span><span class="code">     ]</span>
+<span class="number"><span>422</span></span><span class="code">    }</span>
+<span class="number"><span>423</span></span><span class="code">   ],</span>
+<span class="number"><span>424</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>425</span></span><span class="code">    &quot;N = 16\n&quot;,</span>
+<span class="number"><span>426</span></span><span class="code">    &quot;s = 8\n&quot;,</span>
+<span class="number"><span>427</span></span><span class="code">    &quot;W = rand(s,3,N,2)\n&quot;,</span>
+<span class="number"><span>428</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>429</span></span><span class="code">    &quot;Gm = rand(N)\n&quot;,</span>
+<span class="number"><span>430</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>431</span></span><span class="code">    &quot;ddW = similar(W)\n&quot;,</span>
+<span class="number"><span>432</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>433</span></span><span class="code">    &quot;Q = Vec8Array(W)\n&quot;,</span>
+<span class="number"><span>434</span></span><span class="code">    &quot;ddQ = Vec8Array(ddW)\n&quot;,</span>
+<span class="number"><span>435</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>436</span></span><span class="code">    &quot;q = W[1,:,:,:]\n&quot;,</span>
+<span class="number"><span>437</span></span><span class="code">    &quot;ddq = ddW[1,:,:,:]\n&quot;,</span>
+<span class="number"><span>438</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>439</span></span><span class="code">    &quot;@btime NbodyODE!(ddq, q, Gm, 0.)\n&quot;,</span>
+<span class="number"><span>440</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>441</span></span><span class="code">    &quot;@btime NbodyODE!(ddQ, Q, Gm, 0.)\n&quot;,</span>
+<span class="number"><span>442</span></span><span class="code">    &quot;\n&quot;,</span>
+<span class="number"><span>443</span></span><span class="code">    &quot;\n&quot;</span>
+<span class="number"><span>444</span></span><span class="code">   ]</span>
+<span class="number"><span>445</span></span><span class="code">  },</span>
+<span class="number"><span>446</span></span><span class="code">  {</span>
+<span class="number"><span>447</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>448</span></span><span class="code">   &quot;execution_count&quot;: 16,</span>
+<span class="number"><span>449</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>450</span></span><span class="code">   &quot;outputs&quot;: [],</span>
+<span class="number"><span>451</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>452</span></span><span class="code">    &quot;N=5\n&quot;,</span>
+<span class="number"><span>453</span></span><span class="code">    &quot;uu = rand(8,3,N,2);&quot;</span>
+<span class="number"><span>454</span></span><span class="code">   ]</span>
+<span class="number"><span>455</span></span><span class="code">  },</span>
+<span class="number"><span>456</span></span><span class="code">  {</span>
+<span class="number"><span>457</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>458</span></span><span class="code">   &quot;execution_count&quot;: 17,</span>
+<span class="number"><span>459</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>460</span></span><span class="code">   &quot;outputs&quot;: [</span>
+<span class="number"><span>461</span></span><span class="code">    {</span>
+<span class="number"><span>462</span></span><span class="code">     &quot;ename&quot;: &quot;LoadError&quot;,</span>
+<span class="number"><span>463</span></span><span class="code">     &quot;evalue&quot;: &quot;BoundsError: attempt to access 8×3×5×2 Array{Float64, 4} at index [1, 1, 1]&quot;,</span>
+<span class="number"><span>464</span></span><span class="code">     &quot;output_type&quot;: &quot;error&quot;,</span>
+<span class="number"><span>465</span></span><span class="code">     &quot;traceback&quot;: [</span>
+<span class="number"><span>466</span></span><span class="code">      &quot;BoundsError: attempt to access 8×3×5×2 Array{Float64, 4} at index [1, 1, 1]&quot;,</span>
+<span class="number"><span>467</span></span><span class="code">      &quot;&quot;,</span>
+<span class="number"><span>468</span></span><span class="code">      &quot;Stacktrace:&quot;,</span>
+<span class="number"><span>469</span></span><span class="code">      &quot; [1] getindex&quot;,</span>
+<span class="number"><span>470</span></span><span class="code">      &quot;   @ ./array.jl:806 [inlined]&quot;,</span>
+<span class="number"><span>471</span></span><span class="code">      &quot; [2] getindex(::Vec8Array{Float64, 4}, ::Int64, ::Int64)&quot;,</span>
+<span class="number"><span>472</span></span><span class="code">      &quot;   @ Main ./In[9]:7&quot;,</span>
+<span class="number"><span>473</span></span><span class="code">      &quot; [3] top-level scope&quot;,</span>
+<span class="number"><span>474</span></span><span class="code">      &quot;   @ In[17]:2&quot;,</span>
+<span class="number"><span>475</span></span><span class="code">      &quot; [4] eval&quot;,</span>
+<span class="number"><span>476</span></span><span class="code">      &quot;   @ ./boot.jl:360 [inlined]&quot;,</span>
+<span class="number"><span>477</span></span><span class="code">      &quot; [5] include_string(mapexpr::typeof(REPL.softscope), mod::Module, code::String, filename::String)&quot;,</span>
+<span class="number"><span>478</span></span><span class="code">      &quot;   @ Base ./loading.jl:1116&quot;</span>
+<span class="number"><span>479</span></span><span class="code">     ]</span>
+<span class="number"><span>480</span></span><span class="code">    }</span>
+<span class="number"><span>481</span></span><span class="code">   ],</span>
+<span class="number"><span>482</span></span><span class="code">   &quot;source&quot;: [</span>
+<span class="number"><span>483</span></span><span class="code">    &quot;UU = Vec8Array(uu);\n&quot;,</span>
+<span class="number"><span>484</span></span><span class="code">    &quot;UU[1,1]&quot;</span>
+<span class="number"><span>485</span></span><span class="code">   ]</span>
+<span class="number"><span>486</span></span><span class="code">  },</span>
+<span class="number"><span>487</span></span><span class="code">  {</span>
+<span class="number"><span>488</span></span><span class="code">   &quot;cell_type&quot;: &quot;code&quot;,</span>
+<span class="number"><span>489</span></span><span class="code">   &quot;execution_count&quot;: null,</span>
+<span class="number"><span>490</span></span><span class="code">   &quot;metadata&quot;: {},</span>
+<span class="number"><span>491</span></span><span class="code">   &quot;outputs&quot;: [],</span>
+<span class="number"><span>492</span></span><span class="code">   &quot;source&quot;: []</span>
+<span class="number"><span>493</span></span><span class="code">  }</span>
+<span class="number"><span>494</span></span><span class="code"> ],</span>
+<span class="number"><span>495</span></span><span class="code"> &quot;metadata&quot;: {</span>
+<span class="number"><span>496</span></span><span class="code">  &quot;kernelspec&quot;: {</span>
+<span class="number"><span>497</span></span><span class="code">   &quot;display_name&quot;: &quot;Julia 1.6.6&quot;,</span>
+<span class="number"><span>498</span></span><span class="code">   &quot;language&quot;: &quot;julia&quot;,</span>
+<span class="number"><span>499</span></span><span class="code">   &quot;name&quot;: &quot;julia-1.6&quot;</span>
+<span class="number"><span>500</span></span><span class="code">  },</span>
+<span class="number"><span>501</span></span><span class="code">  &quot;language_info&quot;: {</span>
+<span class="number"><span>502</span></span><span class="code">   &quot;file_extension&quot;: &quot;.jl&quot;,</span>
+<span class="number"><span>503</span></span><span class="code">   &quot;mimetype&quot;: &quot;application/julia&quot;,</span>
+<span class="number"><span>504</span></span><span class="code">   &quot;name&quot;: &quot;julia&quot;,</span>
+<span class="number"><span>505</span></span><span class="code">   &quot;version&quot;: &quot;1.6.6&quot;</span>
+<span class="number"><span>506</span></span><span class="code">  }</span>
+<span class="number"><span>507</span></span><span class="code"> },</span>
+<span class="number"><span>508</span></span><span class="code"> &quot;nbformat&quot;: 4,</span>
+<span class="number"><span>509</span></span><span class="code"> &quot;nbformat_minor&quot;: 2</span>
+<span class="number"><span>510</span></span><span class="code">}</span>
+<span class="number"><span>511</span></span><span class="code"></span>
+</code></pre>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>
+  setTimeout(function() {
+    $(".number").css("width", "20px");
+    $(".number span").attr("class", "ln hljs-subst");
+    resize();
+    var timer = false;
+    $(window).resize(function() {
+      if (timer !== false) {
+        clearTimeout(timer);
+      }
+      timer = setTimeout(function() {
+        resize();
+      }, 200);
+    })
+
+  }, 100);
+  function resize() {
+    $("span.code").each(function(i, c) {
+      var h = $(c).height();
+      $(c).prev().height(h);
+    });
+  }
+</script>
+</body>
+</html>

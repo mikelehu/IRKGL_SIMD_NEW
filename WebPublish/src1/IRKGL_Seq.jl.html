@@ -1,0 +1,301 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <link rel="stylesheet" href="https://rawgithub.com/highlightjs/cdn-release/master/build/styles/github.min.css">
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/highlight.min.js"></script>
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/languages/undefined.min.js"></script>
+  <style>
+    body {
+      margin: 0px;
+      padding: 15px;
+      font-size: 12
+    }
+    .hljs {
+      margin: -15px;
+      word-wrap: break-word;
+    }
+    body, .hljs {
+      font-family: Menlo, Consolas, DejaVu Sans Mono, monospace;
+    }
+    .number {
+      float:left;
+      text-align: right;
+      display: inline-block;
+      margin-right: 5px;
+    }
+    .ln {
+      opacity: 0.5;
+    }
+    pre {
+      tab-size:      4;
+    }
+  </style>
+</head>
+<body>
+<pre><code class="jl">
+<span class="number"><span>1</span></span><span class="code">include(&quot;IRKGL_Coefficients.jl&quot;)</span>
+<span class="number"><span>2</span></span><span class="code"></span>
+<span class="number"><span>3</span></span><span class="code">struct NireODESol{uType,tType,fType}</span>
+<span class="number"><span>4</span></span><span class="code">   t::Array{tType,1}</span>
+<span class="number"><span>5</span></span><span class="code">   u::Array{uType,1}</span>
+<span class="number"><span>6</span></span><span class="code">   iter::Array{Float64,1}</span>
+<span class="number"><span>7</span></span><span class="code">   retcode::Symbol</span>
+<span class="number"><span>8</span></span><span class="code">   f::fType</span>
+<span class="number"><span>9</span></span><span class="code">end</span>
+<span class="number"><span>10</span></span><span class="code"></span>
+<span class="number"><span>11</span></span><span class="code"></span>
+<span class="number"><span>12</span></span><span class="code">struct IRKGL_Seq_Cache{uType,tType,fType,pType}</span>
+<span class="number"><span>13</span></span><span class="code">    odef::fType # function defining the ODE system</span>
+<span class="number"><span>14</span></span><span class="code">    p::pType # parameters and so</span>
+<span class="number"><span>15</span></span><span class="code">    h::tType</span>
+<span class="number"><span>16</span></span><span class="code">    b::Vector{tType}</span>
+<span class="number"><span>17</span></span><span class="code">    c::Vector{tType}</span>
+<span class="number"><span>18</span></span><span class="code">    mu::Array{tType,2}</span>
+<span class="number"><span>19</span></span><span class="code">    nu::Array{tType,2}</span>
+<span class="number"><span>20</span></span><span class="code">    U::Vector{uType}</span>
+<span class="number"><span>21</span></span><span class="code">    Uz::Vector{uType}</span>
+<span class="number"><span>22</span></span><span class="code">    L::Vector{uType}</span>
+<span class="number"><span>23</span></span><span class="code">    F::Vector{uType}</span>
+<span class="number"><span>24</span></span><span class="code">    Dmin::Vector{uType}</span>
+<span class="number"><span>25</span></span><span class="code">    itermax::Int64</span>
+<span class="number"><span>26</span></span><span class="code">    step_number::Array{Int64,0}</span>
+<span class="number"><span>27</span></span><span class="code">    initial_interp::Bool</span>
+<span class="number"><span>28</span></span><span class="code">    trace::Bool</span>
+<span class="number"><span>29</span></span><span class="code">end</span>
+<span class="number"><span>30</span></span><span class="code"></span>
+<span class="number"><span>31</span></span><span class="code">function  IRKGL_Seq(s::Int64, u0::utype, t0::ttype, tf::ttype, n, m, f::ftype, p::ptype;  initial_interp=true,  itermax=100, trace=false) where {utype, ttype, ftype, ptype}</span>
+<span class="number"><span>32</span></span><span class="code">    step_number = Array{Int64,0}(undef)</span>
+<span class="number"><span>33</span></span><span class="code">    step_number[] = 0</span>
+<span class="number"><span>34</span></span><span class="code">    h = (tf-t0)/(n*m)</span>
+<span class="number"><span>35</span></span><span class="code"></span>
+<span class="number"><span>36</span></span><span class="code">    (b, c, mu, nu) = IRKGLCoefficients(s,h)</span>
+<span class="number"><span>37</span></span><span class="code">    sm = s*m</span>
+<span class="number"><span>38</span></span><span class="code">    U = Array{utype}(undef, s)</span>
+<span class="number"><span>39</span></span><span class="code">    Uz = Array{utype}(undef, s)</span>
+<span class="number"><span>40</span></span><span class="code">    L = Array{utype}(undef, s)</span>
+<span class="number"><span>41</span></span><span class="code">    Dmin=Array{utype}(undef,s)</span>
+<span class="number"><span>42</span></span><span class="code">    F = Array{utype}(undef, s)</span>
+<span class="number"><span>43</span></span><span class="code">    for i in 1:s</span>
+<span class="number"><span>44</span></span><span class="code">        U[i] = zero(u0)</span>
+<span class="number"><span>45</span></span><span class="code">        Uz[i] = zero(u0)</span>
+<span class="number"><span>46</span></span><span class="code">        L[i] = zero(u0)</span>
+<span class="number"><span>47</span></span><span class="code">        Dmin[i] = zero(u0)</span>
+<span class="number"><span>48</span></span><span class="code">        F[i] = zero(u0)</span>
+<span class="number"><span>49</span></span><span class="code">    end</span>
+<span class="number"><span>50</span></span><span class="code"></span>
+<span class="number"><span>51</span></span><span class="code">    ej=zero(u0)</span>
+<span class="number"><span>52</span></span><span class="code"></span>
+<span class="number"><span>53</span></span><span class="code"></span>
+<span class="number"><span>54</span></span><span class="code">    uu = Array{typeof(u0)}(undef, n+1)</span>
+<span class="number"><span>55</span></span><span class="code">    tt = Array{ttype}(undef, n+1)</span>
+<span class="number"><span>56</span></span><span class="code">    irkglcache = IRKGL_Seq_Cache(f,p,h,b,c,mu,nu,U,Uz,L,F,Dmin,itermax,step_number,initial_interp,trace)</span>
+<span class="number"><span>57</span></span><span class="code">    iters = zeros(n+1)</span>
+<span class="number"><span>58</span></span><span class="code">    uu[1] = copy(u0)</span>
+<span class="number"><span>59</span></span><span class="code">    tt[1] = t0</span>
+<span class="number"><span>60</span></span><span class="code">    tj = [t0, zero(t0)]</span>
+<span class="number"><span>61</span></span><span class="code">    uj = copy(u0)</span>
+<span class="number"><span>62</span></span><span class="code">    cont = true</span>
+<span class="number"><span>63</span></span><span class="code">    for j in 1:n</span>
+<span class="number"><span>64</span></span><span class="code">        for i in 1:m</span>
+<span class="number"><span>65</span></span><span class="code">           irkglcache.step_number[] += 1</span>
+<span class="number"><span>66</span></span><span class="code">           j_eval = IRKGLstep!(tj,uj,ej,irkglcache)</span>
+<span class="number"><span>67</span></span><span class="code">           iters[j+1] += j_eval</span>
+<span class="number"><span>68</span></span><span class="code">        end</span>
+<span class="number"><span>69</span></span><span class="code">        iters[j+1] /= sm  # average number of iterations per step</span>
+<span class="number"><span>70</span></span><span class="code">        uu[j+1] = uj + ej</span>
+<span class="number"><span>71</span></span><span class="code">        tt[j+1] = tj[1] + tj[2]</span>
+<span class="number"><span>72</span></span><span class="code">    end</span>
+<span class="number"><span>73</span></span><span class="code">    sol = NireODESol(tt,uu,iters,:Successs,f)</span>
+<span class="number"><span>74</span></span><span class="code">    return sol</span>
+<span class="number"><span>75</span></span><span class="code">  end</span>
+<span class="number"><span>76</span></span><span class="code"></span>
+<span class="number"><span>77</span></span><span class="code"></span>
+<span class="number"><span>78</span></span><span class="code"></span>
+<span class="number"><span>79</span></span><span class="code"></span>
+<span class="number"><span>80</span></span><span class="code">function IRKGLstep!(ttj,uj,ej,IRKGL_Seq_Cache::IRKGL_Seq_Cache)</span>
+<span class="number"><span>81</span></span><span class="code">       f = IRKGL_Seq_Cache.odef</span>
+<span class="number"><span>82</span></span><span class="code">       p = IRKGL_Seq_Cache.p</span>
+<span class="number"><span>83</span></span><span class="code">       h = IRKGL_Seq_Cache.h</span>
+<span class="number"><span>84</span></span><span class="code">       b = IRKGL_Seq_Cache.b</span>
+<span class="number"><span>85</span></span><span class="code">       c = IRKGL_Seq_Cache.c</span>
+<span class="number"><span>86</span></span><span class="code">       mu = IRKGL_Seq_Cache.mu</span>
+<span class="number"><span>87</span></span><span class="code">       nu = IRKGL_Seq_Cache.nu</span>
+<span class="number"><span>88</span></span><span class="code">       U = IRKGL_Seq_Cache.U</span>
+<span class="number"><span>89</span></span><span class="code">       Uz = IRKGL_Seq_Cache.Uz</span>
+<span class="number"><span>90</span></span><span class="code">       L = IRKGL_Seq_Cache.L</span>
+<span class="number"><span>91</span></span><span class="code">       F = IRKGL_Seq_Cache.F</span>
+<span class="number"><span>92</span></span><span class="code">       Dmin = IRKGL_Seq_Cache.Dmin</span>
+<span class="number"><span>93</span></span><span class="code">       step_number = IRKGL_Seq_Cache.step_number[]</span>
+<span class="number"><span>94</span></span><span class="code">       initial_interp = IRKGL_Seq_Cache.initial_interp</span>
+<span class="number"><span>95</span></span><span class="code">       trace = IRKGL_Seq_Cache.trace</span>
+<span class="number"><span>96</span></span><span class="code">       s = length(b)</span>
+<span class="number"><span>97</span></span><span class="code">       dim = length(uj)</span>
+<span class="number"><span>98</span></span><span class="code">       elems = s*dim</span>
+<span class="number"><span>99</span></span><span class="code">       itermax = (step_number==1 ? 10+IRKGL_Seq_Cache.itermax : IRKGL_Seq_Cache.itermax )</span>
+<span class="number"><span>100</span></span><span class="code">       sitermax = s * itermax</span>
+<span class="number"><span>101</span></span><span class="code">       tj = ttj[1]</span>
+<span class="number"><span>102</span></span><span class="code">       te = ttj[2]</span>
+<span class="number"><span>103</span></span><span class="code">       indices=eachindex(uj)</span>
+<span class="number"><span>104</span></span><span class="code"></span>
+<span class="number"><span>105</span></span><span class="code">       if initial_interp</span>
+<span class="number"><span>106</span></span><span class="code">          for is in 1:s</span>
+<span class="number"><span>107</span></span><span class="code">            for k in indices</span>
+<span class="number"><span>108</span></span><span class="code">                dUik = muladd(nu[is,1], L[1][k], ej[k])</span>
+<span class="number"><span>109</span></span><span class="code">                for js in 2:s</span>
+<span class="number"><span>110</span></span><span class="code">                    dUik = muladd(nu[is,js], L[js][k], dUik)</span>
+<span class="number"><span>111</span></span><span class="code">                end</span>
+<span class="number"><span>112</span></span><span class="code">                U[is][k] =  uj[k]  + dUik</span>
+<span class="number"><span>113</span></span><span class="code">            end</span>
+<span class="number"><span>114</span></span><span class="code">          end</span>
+<span class="number"><span>115</span></span><span class="code">       else</span>
+<span class="number"><span>116</span></span><span class="code">          for is in 1:s</span>
+<span class="number"><span>117</span></span><span class="code">             for k in indices</span>
+<span class="number"><span>118</span></span><span class="code">                U[is][k] = uj[k] + ej[k]</span>
+<span class="number"><span>119</span></span><span class="code">             end</span>
+<span class="number"><span>120</span></span><span class="code">          end</span>
+<span class="number"><span>121</span></span><span class="code">       end</span>
+<span class="number"><span>122</span></span><span class="code"></span>
+<span class="number"><span>123</span></span><span class="code"></span>
+<span class="number"><span>124</span></span><span class="code">    j_eval = 0  # counter of evaluations of f</span>
+<span class="number"><span>125</span></span><span class="code">    j_iter = 0  # counter of fixed_point iterations</span>
+<span class="number"><span>126</span></span><span class="code"></span>
+<span class="number"><span>127</span></span><span class="code"></span>
+<span class="number"><span>128</span></span><span class="code">    @inbounds for is in 1:s</span>
+<span class="number"><span>129</span></span><span class="code">            f(F[is], U[is], p, tj + h*c[is])</span>
+<span class="number"><span>130</span></span><span class="code">            for k in indices</span>
+<span class="number"><span>131</span></span><span class="code">                L[is][k] = h*b[is]*F[is][k]</span>
+<span class="number"><span>132</span></span><span class="code">                Dmin[is][k] = Inf</span>
+<span class="number"><span>133</span></span><span class="code">            end</span>
+<span class="number"><span>134</span></span><span class="code"></span>
+<span class="number"><span>135</span></span><span class="code">    end</span>
+<span class="number"><span>136</span></span><span class="code">    j_eval += s</span>
+<span class="number"><span>137</span></span><span class="code"></span>
+<span class="number"><span>138</span></span><span class="code"></span>
+<span class="number"><span>139</span></span><span class="code">    iter = true # Initialize iter outside the for loop</span>
+<span class="number"><span>140</span></span><span class="code">    plusIt=true</span>
+<span class="number"><span>141</span></span><span class="code"></span>
+<span class="number"><span>142</span></span><span class="code"></span>
+<span class="number"><span>143</span></span><span class="code"></span>
+<span class="number"><span>144</span></span><span class="code">    @inbounds while (j_eval&lt;sitermax &amp;&amp; iter)</span>
+<span class="number"><span>145</span></span><span class="code">            j_iter += 1</span>
+<span class="number"><span>146</span></span><span class="code"></span>
+<span class="number"><span>147</span></span><span class="code">            iter = false</span>
+<span class="number"><span>148</span></span><span class="code"></span>
+<span class="number"><span>149</span></span><span class="code">            for is in 1:s</span>
+<span class="number"><span>150</span></span><span class="code">              for k in indices</span>
+<span class="number"><span>151</span></span><span class="code">                Uz[is][k] = U[is][k]</span>
+<span class="number"><span>152</span></span><span class="code">                dUik = muladd(mu[is,1], L[1][k], ej[k])</span>
+<span class="number"><span>153</span></span><span class="code">                for js in 2:s</span>
+<span class="number"><span>154</span></span><span class="code">                    dUik = muladd(mu[is,js], L[js][k], dUik)</span>
+<span class="number"><span>155</span></span><span class="code">                end</span>
+<span class="number"><span>156</span></span><span class="code">                U[is][k] =  uj[k] + dUik</span>
+<span class="number"><span>157</span></span><span class="code">              end</span>
+<span class="number"><span>158</span></span><span class="code">            end</span>
+<span class="number"><span>159</span></span><span class="code"></span>
+<span class="number"><span>160</span></span><span class="code"></span>
+<span class="number"><span>161</span></span><span class="code">            if trace</span>
+<span class="number"><span>162</span></span><span class="code">                DYmax = 0.</span>
+<span class="number"><span>163</span></span><span class="code">                ismax = 0</span>
+<span class="number"><span>164</span></span><span class="code">                kmax = 0</span>
+<span class="number"><span>165</span></span><span class="code">                println(&quot;step_number=$step_number, j_iter=$j_iter,  initial_fp=false&quot;)</span>
+<span class="number"><span>166</span></span><span class="code">            end</span>
+<span class="number"><span>167</span></span><span class="code">            diffU = false</span>
+<span class="number"><span>168</span></span><span class="code">            for is in 1:s</span>
+<span class="number"><span>169</span></span><span class="code"></span>
+<span class="number"><span>170</span></span><span class="code">                eval=false</span>
+<span class="number"><span>171</span></span><span class="code">                for k in indices</span>
+<span class="number"><span>172</span></span><span class="code">                            DY = abs(U[is][k]-Uz[is][k])</span>
+<span class="number"><span>173</span></span><span class="code"></span>
+<span class="number"><span>174</span></span><span class="code">                            if DY&gt;0.</span>
+<span class="number"><span>175</span></span><span class="code">                               eval = true</span>
+<span class="number"><span>176</span></span><span class="code">                               diffU = true</span>
+<span class="number"><span>177</span></span><span class="code">                               if DY&lt; Dmin[is][k]</span>
+<span class="number"><span>178</span></span><span class="code">                                  Dmin[is][k]=DY</span>
+<span class="number"><span>179</span></span><span class="code">                                  iter=true</span>
+<span class="number"><span>180</span></span><span class="code">                               end</span>
+<span class="number"><span>181</span></span><span class="code">                           end</span>
+<span class="number"><span>182</span></span><span class="code">                end</span>
+<span class="number"><span>183</span></span><span class="code"></span>
+<span class="number"><span>184</span></span><span class="code"></span>
+<span class="number"><span>185</span></span><span class="code">               if eval</span>
+<span class="number"><span>186</span></span><span class="code"></span>
+<span class="number"><span>187</span></span><span class="code">                    f(F[is], U[is], p,  tj  + h*c[is])</span>
+<span class="number"><span>188</span></span><span class="code"></span>
+<span class="number"><span>189</span></span><span class="code">                    j_eval += 1</span>
+<span class="number"><span>190</span></span><span class="code">                    for k in indices</span>
+<span class="number"><span>191</span></span><span class="code">                        L[is][k] = h*b[is]*F[is][k]</span>
+<span class="number"><span>192</span></span><span class="code">                    end</span>
+<span class="number"><span>193</span></span><span class="code">               end</span>
+<span class="number"><span>194</span></span><span class="code">           end</span>
+<span class="number"><span>195</span></span><span class="code"></span>
+<span class="number"><span>196</span></span><span class="code"></span>
+<span class="number"><span>197</span></span><span class="code">            if (!iter &amp;&amp; diffU &amp;&amp; plusIt)</span>
+<span class="number"><span>198</span></span><span class="code">                iter=true</span>
+<span class="number"><span>199</span></span><span class="code">                plusIt=false</span>
+<span class="number"><span>200</span></span><span class="code">            else</span>
+<span class="number"><span>201</span></span><span class="code">                plusIt=true</span>
+<span class="number"><span>202</span></span><span class="code">            end</span>
+<span class="number"><span>203</span></span><span class="code"></span>
+<span class="number"><span>204</span></span><span class="code">        end # while</span>
+<span class="number"><span>205</span></span><span class="code"></span>
+<span class="number"><span>206</span></span><span class="code"></span>
+<span class="number"><span>207</span></span><span class="code"></span>
+<span class="number"><span>208</span></span><span class="code">        for k in indices    #Batura konpentsatuaren parekoa</span>
+<span class="number"><span>209</span></span><span class="code">            e0 = ej[k]</span>
+<span class="number"><span>210</span></span><span class="code">            for is in 1:s</span>
+<span class="number"><span>211</span></span><span class="code">	         e0 += muladd(F[is][k], h*b[is], -L[is][k])</span>
+<span class="number"><span>212</span></span><span class="code">            end</span>
+<span class="number"><span>213</span></span><span class="code">            res = Base.TwicePrecision(uj[k], e0)</span>
+<span class="number"><span>214</span></span><span class="code">            for is in 1:s</span>
+<span class="number"><span>215</span></span><span class="code">	       res += L[is][k]</span>
+<span class="number"><span>216</span></span><span class="code">            end</span>
+<span class="number"><span>217</span></span><span class="code">            uj[k] = res.hi</span>
+<span class="number"><span>218</span></span><span class="code">            ej[k] = res.lo</span>
+<span class="number"><span>219</span></span><span class="code">         end</span>
+<span class="number"><span>220</span></span><span class="code"></span>
+<span class="number"><span>221</span></span><span class="code"></span>
+<span class="number"><span>222</span></span><span class="code">         res = Base.TwicePrecision(tj, te) + h</span>
+<span class="number"><span>223</span></span><span class="code">         ttj[1] = res.hi</span>
+<span class="number"><span>224</span></span><span class="code">         ttj[2] = res.lo</span>
+<span class="number"><span>225</span></span><span class="code">         if trace</span>
+<span class="number"><span>226</span></span><span class="code">            println(&quot;j_eval=&quot;, j_eval)</span>
+<span class="number"><span>227</span></span><span class="code">         end</span>
+<span class="number"><span>228</span></span><span class="code">         return  (j_eval)</span>
+<span class="number"><span>229</span></span><span class="code"></span>
+<span class="number"><span>230</span></span><span class="code">end</span>
+<span class="number"><span>231</span></span><span class="code"></span>
+<span class="number"><span>232</span></span><span class="code"></span>
+<span class="number"><span>233</span></span><span class="code">function Rdigits(x::Real,r::Real)</span>
+<span class="number"><span>234</span></span><span class="code">    mx=r*x</span>
+<span class="number"><span>235</span></span><span class="code">    mxx=mx+x</span>
+<span class="number"><span>236</span></span><span class="code">    return mxx-mx</span>
+<span class="number"><span>237</span></span><span class="code">end</span>
+<span class="number"><span>238</span></span><span class="code"></span>
+</code></pre>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>
+  setTimeout(function() {
+    $(".number").css("width", "20px");
+    $(".number span").attr("class", "ln hljs-subst");
+    resize();
+    var timer = false;
+    $(window).resize(function() {
+      if (timer !== false) {
+        clearTimeout(timer);
+      }
+      timer = setTimeout(function() {
+        resize();
+      }, 200);
+    })
+
+  }, 100);
+  function resize() {
+    $("span.code").each(function(i, c) {
+      var h = $(c).height();
+      $(c).prev().height(h);
+    });
+  }
+</script>
+</body>
+</html>
