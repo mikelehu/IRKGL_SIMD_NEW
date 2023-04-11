@@ -84,6 +84,7 @@ function launch_IRKGL_tests(integrator, final_state, prob, s, dts; dim=1, adapti
   #                IRKNGL_seq, IRKNGL_simd
   #                IRKNGL_seq, IRKNGL_simd
   #
+
        k=length(dts)
        errors=zeros(k)
        times=zeros(k)  
@@ -94,19 +95,40 @@ function launch_IRKGL_tests(integrator, final_state, prob, s, dts; dim=1, adapti
        if (integrator==IRKNGL_Seq)   alg=IRKNGL_Seq(s=s, initial_interp=initial_interp) end
       
 
-       for i in 1:k
+       if (adaptive==true)
+
+        for i in 1:k
   
-         dti=dts[i]
-         soli=solve(prob,alg; dt=dti, adaptive=adaptive,  save_everystep=false, maxiters=maxiters)
-         errors[i]=norm(final_state-soli.u[end])/norm(final_state)
+          dti=dts[i]
+          soli=solve(prob,alg; dt=dti, adaptive=true,  save_everystep=false, maxiters=maxiters)
+          errors[i]=norm(final_state-soli.u[end])/norm(final_state)
   
-         for k in 1:nruns
-             times[i]+=@elapsed solve(prob,alg; dt=dti, adaptive=adaptive, save_everystep=false, maxiters=maxiters)
-         end
+          for k in 1:nruns
+             times[i]+=@elapsed solve(prob,alg; dt=dti, adaptive=true, save_everystep=false, maxiters=maxiters)
+          end
   
-         times[i]=times[i]/nruns
+          times[i]=times[i]/nruns
   
-       end
+        end
+
+       
+       else  # adaptive==false
+
+        for i in 1:k
+  
+          dti=dts[i]
+          soli=solve(prob,alg; dt=dti, adaptive=false,  save_everystep=false, maxiters=maxiters)
+          errors[i]=norm(final_state-soli.u[end])/norm(final_state)
+  
+          for k in 1:nruns
+             times[i]+=@elapsed solve(prob,alg; dt=dti, adaptive=false, save_everystep=false, maxiters=maxiters)
+          end
+  
+          times[i]=times[i]/nruns
+  
+        end
+
+      end
   
        WPTests(errors,times)
   

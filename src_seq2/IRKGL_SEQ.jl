@@ -1,6 +1,6 @@
 __precompile__()
 
-module IRKGL_SEQ
+module IRKGL_SEQ2
 
 using Reexport
 @reexport using DiffEqBase
@@ -10,9 +10,8 @@ using Parameters
 using OrdinaryDiffEq
 
 
-export  IRKGL_Seq, IRKNGL_Seq, IRKAlgorithm_seq
+export  IRKGL_sek, IRKNGL_sek, IRKAlgorithm_sek
 #export  IRKGLCoefficients
-
 
 include("../src/IRKGL_Coefficients.jl")
 include("IRKGL_Seq_Solver.jl")

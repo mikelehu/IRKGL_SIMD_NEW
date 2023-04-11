@@ -1,4 +1,13 @@
 
+struct NireODESol{uType,tType,fType}
+    t::Array{tType,1}
+    u::Array{uType,1}
+    iter::Array{Float64,1}
+    retcode::Symbol
+    f::fType
+ end
+
+
 struct IRKGL_Cache{uT,tT,fT,pT}
     odef::fT # function defining the ODE system
     p::pT # parameters and so
@@ -16,7 +25,7 @@ struct IRKGL_Cache{uT,tT,fT,pT}
     step_number::Array{Int64,0}
     initial_interp::Array{Int64,0}
     length_u::Int64
-    nrmdigits::Array{tT, 0}
+    nrmdigits::Array{Int64, 0}
 end
 
 
@@ -29,30 +38,18 @@ function Rdigits(x::Real,r::Real)
 end
 
 
-abstract type IRKAlgorithm{s,initial_interp, m,myoutputs,nrmbits} <: OrdinaryDiffEqAlgorithm end
-struct IRKGL_Seq{s,  initial_interp, m,myoutputs,nrmbits} <: IRKAlgorithm{s, initial_interp, m,myoutputs,nrmbits} end
-IRKGL_Seq(;s=8, initial_interp=1, m=1,myoutputs=false,nrmbits=0)=IRKGL_Seq{s, initial_interp, m,myoutputs,nrmbits}()
 
-function DiffEqBase.__solve(prob::DiffEqBase.AbstractODEProblem{uType,tspanType,isinplace},
-    alg::IRKGL_Seq{s,initial_interp, m,myoutputs,nrmbits}, args...;
-    dt,
-    saveat=eltype(tspanType)[],
-    gamma=eltype(uType)[],
-    save_everystep=true,
-    adaptive=false,
-    maxiters=100,
-    kwargs...) where {uType,tspanType,isinplace,s,m,initial_interp,myoutputs,nrmbits}
+function IRKGL_sek(u0::uType, dt::tType, t0::tType, tf::tType, f::fType, p::pType; 
+                   s=8,m=1,initial_interp=1,myoutputs=false,nrmbits=0, save_everystep=true,
+                   saveat=[],gamma=[], maxiters=100, adaptive=false) where {uType, tType, fType, pType}
 
     trace = false
 
- #   println("Integrazio berria dt=",dt)
+    u0type=typeof(u0)
+    uu = u0type[]
+    tt = tType[]
 
-    stats = DiffEqBase.Stats(0)
-    @unpack f,u0,tspan,p,kwargs=prob
-    f= SciMLBase.unwrapped_f(prob.f) 
-
-    uiType=eltype(uType)
-    tType=eltype(tspanType)
+    tType2=tType
 
     step_number = Array{Int64,0}(undef)
     step_number[] = 0
@@ -61,25 +58,19 @@ function DiffEqBase.__solve(prob::DiffEqBase.AbstractODEProblem{uType,tspanType,
 
     uiType=eltype(uType)
 
-    dtprev=zero(tType)
-    signdt=sign(tspan[2]-tspan[1]) 
-               
-    if signdt==1 
-        t0=prob.tspan[1]
-        tf=prob.tspan[2]   # forward
-     else
-        t0=prob.tspan[2]
-        tf=prob.tspan[1]   # backward
-     end
+    dtprev=zero(tType2) 
+    signdt=sign(tf-t0)
 
     dts=[dt,dtprev,signdt]
 
     (b, c, mu, nu) = IRKGLCoefficients(s,dt)
+
     length_u = length(u0)
+    dims = size(u0)
     indices=1:length_u
 
      uu = uType[]
-     tt = tType[]
+     tt = tType2[]
 
      U=Array{uType}(undef, s)
      for i in 1:s
@@ -94,11 +85,11 @@ function DiffEqBase.__solve(prob::DiffEqBase.AbstractODEProblem{uType,tspanType,
      Dmin=Array{uiType}(undef,length_u)
      Dmin.=zero(uiType)
  
-     nrmdig = Array{uiType, 0}(undef)
+     nrmdig = Array{Int64, 0}(undef)
      if (nrmbits > 0)
-         nrmdig[] = uiType(2^nrmbits)
+          nrmdig[] = 2^nrmbits
      else
-         nrmdig[] = zero(uiType)
+         nrmdig[] = 0
      end
 
  
@@ -117,18 +108,18 @@ function DiffEqBase.__solve(prob::DiffEqBase.AbstractODEProblem{uType,tspanType,
      tj = [t0, zero(t0)]
      uj = copy(u0)
      ej= zero(u0)
-     
+
      tj_=similar(tj)
      uj_=similar(uj)
      ej_=similar(ej)
      L_=deepcopy(L)
      dts_=similar(dts)
-     
-     tstops=tType[]
+
+     tstops=[]
 
      if isempty(saveat)     
                                
-        tstops=tType[Inf]
+        tstops=[Inf] 
 #        save_everystep=true
                                
      else
@@ -147,24 +138,23 @@ function DiffEqBase.__solve(prob::DiffEqBase.AbstractODEProblem{uType,tspanType,
                                
  #      m=1
         save_everystep=false
-
         if tstops[end]==t0 pop!(tstops) end 
                               
      end
-                         
-     tout= Array{uiType,0}(undef)                       
-     tout[]=pop!(tstops)
-     save_step=false   
      
-     if adaptive
+     tout= Array{uiType,0}(undef)
+     tout[]=pop!(tstops)
+     save_step=false    
 
-        println("Error: adaptive ==true")
-       
-     else  # adaptive=false
+    if adaptive == true
 
-        cont=true
+      println("Error: adaptive ==true")
+    
+    else
+
+     cont=true
         
-        while cont
+     while cont
           
             tit=0
             j=0
@@ -174,25 +164,21 @@ function DiffEqBase.__solve(prob::DiffEqBase.AbstractODEProblem{uType,tspanType,
                 j+=1  
                 step_number[]+= 1
 
-                (status,j_iter) = IRKGLstep_fixed!(tj,tf,uj,ej,prob,dts,irkgl_cache)
+                (status,j_iter) = IRKGLstep_fixed!(tj,tf,uj,ej,dts,irkgl_cache)
   
-                
                 if (status=="Failure")
                     println("Fail")
-                    sol=DiffEqBase.build_solution(prob,alg,tt,uu,retcode= ReturnCode.Failure)
-                    if (myoutputs==true)
-                        return(sol,iters, step_number[])
-                    else
-                        return(sol)
-                     end
+ #                   sol=DiffEqBase.build_solution(prob,alg,tt,uu,retcode= ReturnCode.Failure)
+                    sol = NireODESol(tt,uu,iters,:Successs,f)
+                    return(sol)
                 end
-                
   
                 tit+=j_iter
+
                 
-
-
                 if tout[]<tj[1]+tj[2]
+
+                    println("emaitza itzuli ...")
 
                     tj_.=tj
 
@@ -214,13 +200,14 @@ function DiffEqBase.__solve(prob::DiffEqBase.AbstractODEProblem{uType,tspanType,
                     dts_[3]=-dts[3]
     
                     init_interp=0
-                    (status_,j_iter_) = IRKGLstep_fixed!(tj_,tf, uj_,ej_,prob,dts_,irkngl_cache)
+                    (status_,j_iter_) = IRKGLstep_fixed!(tj_,tf, uj_,ej_,dts_,irkgl_cache)
                     
                     if (status=="Failure")
-                        println("Fail-Computing tout")
-                        sol=DiffEqBase.build_solution(prob,alg,tt,uu, retcode= ReturnCode.Failure)
+                        println("Fail- Computing tout")
+#                        sol=DiffEqBase.build_solution(prob,alg,tt,uu, retcode= ReturnCode.Failure)
+                        sol = NireODESol(tt,uu,iters,:Successs,f)
                         if (myoutputs==true)
-                          return(sol,iters,step_number[])
+                          return(sol,iters, step_number[])
                         else
                           return(sol)
                         end
@@ -236,23 +223,19 @@ function DiffEqBase.__solve(prob::DiffEqBase.AbstractODEProblem{uType,tspanType,
     
                     push!(uu,uj_+ej_)
                     push!(tt,tj_[1]+tj_[2])
-
-                    tit+=j_iter_-j_iter
-                    push!(iters, tit/j)
-                    j=0
-                    tit=0
     
                     tout[]=pop!(tstops)
-   
+    
                 elseif tout[]==tj[1]+tj[2]
-
+                
                     save_step=true
-                    tout[]=pop!(tstops)    
-
+                    tout[]=pop!(tstops)
+    
                 end
 
    
                 if (dts[1]==0)
+
                     cont=false
                     break
                 end
@@ -268,16 +251,16 @@ function DiffEqBase.__solve(prob::DiffEqBase.AbstractODEProblem{uType,tspanType,
 
         end # end while
 
-
-        sol=DiffEqBase.build_solution(prob,alg,tt,uu,stats=stats,retcode= ReturnCode.Success)
-     
-        if (myoutputs==true)
-            return(sol,iters,step_number[])
-        else
-           return(sol)
-        end
-
     end
+
+
+ #       sol=DiffEqBase.build_solution(prob,alg,tt,uu,destats=destats,retcode= ReturnCode.Success)
+
+    sol = NireODESol(tt,uu,iters,:Successs,f)
+     
+    return(sol)
+
+  
   
 end
 

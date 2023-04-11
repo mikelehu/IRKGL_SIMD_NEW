@@ -5,7 +5,7 @@
 
 
 
-function IRKGLstep_SIMD_fixed!(ttj,tj1, uj,ej,prob,dts,irkglcache::IRKGL_SIMD_Cache{floatType,fType,pType,s_,dim,dim_}) where {floatType,fType,pType,s_,dim,dim_}
+function IRKGLstep_SIMD_fixed!(ttj,tj1, uj,ej,dts,irkglcache::IRKGL_SIMD_Cache{floatType,fType,pType,s_,dim,dim_}) where {floatType,fType,pType,s_,dim,dim_}
 
     f = irkglcache.odef
     p = irkglcache.p

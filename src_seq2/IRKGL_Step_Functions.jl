@@ -2,9 +2,10 @@
 #  IRKGLstep_fixed!
 
 
-function IRKGLstep_fixed!(ttj,tj1, uj,ej,prob,dts,irkgl_cache::IRKGL_Cache{uType,tType2,fType,pType}) where {uType,tType2,fType,pType}
+function IRKGLstep_fixed!(ttj,tj1, uj,ej,dts,irkgl_cache::IRKGL_Cache{uType,tType2,fType,pType}) where {uType,tType2,fType,pType}
 
     trace = false
+
     
      f = irkgl_cache.odef
      p = irkgl_cache.p
@@ -58,10 +59,11 @@ function IRKGLstep_fixed!(ttj,tj1, uj,ej,prob,dts,irkgl_cache::IRKGL_Cache{uType
     iter = true # Initialize iter outside the for loop
     plusIt=true
     diffU = true
-   
+    
     
     trace ? println("Urratsa tj=",tj+te,", iter=", 1, ",dt=", Float32(dt)) : nothing
-
+    trace ? println("Norm L=", norm(L), ", Norm U=", norm(U), ", Norm ej=", norm(ej), ", Norm p =", p) : nothing
+    trace ? println("tj=", tj, ",dts=", dts, "sdt=", sdt) : nothing
     
     @inbounds while (j_iter<maxiters && iter)  
     
@@ -75,7 +77,8 @@ function IRKGLstep_fixed!(ttj,tj1, uj,ej,prob,dts,irkgl_cache::IRKGL_Cache{uType
                   L[is][k] = sdt*(b[is]*F[is][k])
               end
           end
-          
+
+          trace ? println("Norm(F)=", norm(F)) : nothing
     
           for is in 1:s
               for k in indices
@@ -123,8 +126,7 @@ function IRKGLstep_fixed!(ttj,tj1, uj,ej,prob,dts,irkgl_cache::IRKGL_Cache{uType
          return("Failure",0)
      end
     
-      @inbounds if (j_iter<maxiters && diffU)   
-        
+      @inbounds if (j_iter<maxiters && diffU)    #s=8 j_iter>22
               j_iter += 1
     
               for is in 1:s

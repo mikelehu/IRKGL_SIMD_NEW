@@ -1,6 +1,14 @@
 include("VecArray_def.jl")
 
 
+struct NireODESol{uType,tType,fType}
+    t::Array{tType,1}
+    u::Array{uType,1}
+    iter::Array{Float64,1}
+    retcode::Symbol
+    f::fType
+ end
+
 struct IRKNGL_SIMD_Cache{floatType,fType,pType,s_,dim,dim_}
     odef::fType # function defining the ODE system
     p::pType # parameters and so
@@ -36,48 +44,33 @@ function Rdigits(x::Vec,r::Real)
 end
 
 
-abstract type IRKAlgorithm{s,initial_interp, dim,floatType,m,myoutputs,nrmbits} <: OrdinaryDiffEqAlgorithm end
-struct IRKNGL_simd{s, initial_interp, dim,floatType,m,myoutputs,nrmbits} <: IRKAlgorithm{s, initial_interp, dim,floatType,m,myoutputs,nrmbits} end
-IRKNGL_simd(;s=8, initial_interp=1, dim=1,floatType=Float64,m=1,myoutputs=false,nrmbits=0)=IRKNGL_simd{s, initial_interp, dim,floatType,m,myoutputs,nrmbits}()
 
-function DiffEqBase.__solve(prob::DiffEqBase.AbstractODEProblem{uType,tspanType,isinplace},
-    alg::IRKNGL_simd{s,initial_interp, dim,floatType, m,myoutputs,nrmbits}, args...;
-    dt,
-    saveat=eltype(tspanType)[],
-    gamma=eltype(uType)[],
-    save_everystep=true,
-    adaptive=false,
-    maxiters=100,
-    kwargs...) where {floatType<: Union{Float32,Float64},uType,tspanType,isinplace,dim,s,m,initial_interp,myoutputs,nrmbits}
+function IRKNGL_simd_2(u0::uType, dt::tType, t0::tType, tf::tType, f::fType, p::pType; 
+    s=8,m=1,dim=1, initial_interp=1,myoutputs=false,nrmbits=0, save_everystep=true,
+#    saveat=[], maxiters=100, adaptive=false) where {floatType<: Union{Float32,Float64}, uType, tType, fType, pType}    
+    saveat=[], maxiters=100, adaptive=false) where {uType, tType, fType, pType}    
 
     trace=false
-   
-    stats = DiffEqBase.Stats(0)
-    @unpack f,u0,tspan,p,kwargs=prob
-    f= SciMLBase.unwrapped_f(prob.f) 
 
-    tType=eltype(tspanType)
-
-    utype = Vector{floatType}
-#    ttype = floatType
+    tspan=(t0,tf)
 
     step_number = Array{Int64,0}(undef)
     step_number[] = 0
     init_interp =  Array{Int64,0}(undef)
     init_interp[] = initial_interp
 
-#    dts = Array{tType}(undef, 1)
+
     uiType=eltype(u0)
 
     dtprev=zero(tType)
     signdt=sign(tspan[2]-tspan[1]) 
                
     if signdt==1 
-        t0=prob.tspan[1]
-        tf=prob.tspan[2]   # forward
+        t0=tspan[1]
+        tf=tspan[2]   # forward
      else
-        t0=prob.tspan[2]
-        tf=prob.tspan[1]   # backward
+        t0=tspan[2]
+        tf=tspan[1]   # backward
      end
 
     dts=[dt,dtprev,signdt]
@@ -89,16 +82,16 @@ function DiffEqBase.__solve(prob::DiffEqBase.AbstractODEProblem{uType,tspanType,
     indices=1:length_u
     indices2 = (length_q+1):length_u
 
-    c = vload(Vec{s,floatType}, c_, 1)
-    b = vload(Vec{s,floatType}, b_, 1)
-    nu=VecArray{s,floatType,2}(nu_)
-    mu=VecArray{s,floatType,2}(mu_)
+    c = vload(Vec{s,uiType}, c_, 1)
+    b = vload(Vec{s,uiType}, b_, 1)
+    nu=VecArray{s,uiType,2}(nu_)
+    mu=VecArray{s,uiType,2}(mu_)
 
     uu = uType[]
     tt = tType[]
 
-    zz=zeros(Float64, s, dims...)
-    U=VecArray{s,Float64,length(dims)+1}(zz)
+    zz=zeros(uiType, s, dims...)
+    U=VecArray{s,uiType,length(dims)+1}(zz)
     U_=deepcopy(U)
     L=deepcopy(U)
     dU=deepcopy(U)
@@ -185,11 +178,12 @@ function DiffEqBase.__solve(prob::DiffEqBase.AbstractODEProblem{uType,tspanType,
                  j+=1
 
                   step_number[] += 1
-                 (status,j_iter) = IRKNGLstep_SIMD_fixed!(tj,tf,uj,ej,prob,dts,irkngl_cache)
+                 (status,j_iter) = IRKNGLstep_SIMD_fixed!(tj,tf,uj,ej,dts,irkngl_cache)
   
                  if (status=="Failure")
                     println("Fail")
-                    sol=DiffEqBase.build_solution(prob,alg,tt,uu,retcode= ReturnCode.Failure) 
+#                    sol=DiffEqBase.build_solution(prob,alg,tt,uu,retcode= ReturnCode.Failure) 
+                    sol = NireODESol(tt,uu,iters,:Successs,f)
                     if (myoutputs==true)
                         return(sol,iters, step_number[])
                     else
@@ -212,11 +206,12 @@ function DiffEqBase.__solve(prob::DiffEqBase.AbstractODEProblem{uType,tspanType,
                     dts_[3]=-dts[3]
 
                     init_interp=0
-                    (status_,j_iter_) = IRKNGLstep_SIMD_fixed!(tj_,tf, uj_,ej_,prob,dts_,irkngl_cache)
+                    (status_,j_iter_) = IRKNGLstep_SIMD_fixed!(tj_,tf, uj_,ej_,dts_,irkngl_cache)
                     
                     if (status=="Failure")
                         println("Fail- Computing tout")
-                        sol=DiffEqBase.build_solution(prob,alg,tt,uu, retcode= ReturnCode.Failure)
+#                        sol=DiffEqBase.build_solution(prob,alg,tt,uu, retcode= ReturnCode.Failure)
+                        sol = NireODESol(tt,uu,iters,:Successs,f)
                         if (myoutputs==true)
                           return(sol,iters, step_number[])
                         else
@@ -262,7 +257,8 @@ function DiffEqBase.__solve(prob::DiffEqBase.AbstractODEProblem{uType,tspanType,
         dts[1]=dt
         dts[2]=zero(tType)
 
-        sol=DiffEqBase.build_solution(prob,alg,tt,uu,stats=stats,retcode= ReturnCode.Success)
+#        sol=DiffEqBase.build_solution(prob,alg,tt,uu,destats=destats,retcode= ReturnCode.Success)
+        sol = NireODESol(tt,uu,iters,:Successs,f)
   
         if (myoutputs==true)
             return(sol,iters,step_number[])
